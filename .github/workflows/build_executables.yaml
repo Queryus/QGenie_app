@@ -11,6 +11,7 @@ jobs:
   #    파이프라인 시작 알림
   # ==================================
   start:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - name: Send Pipeline Start Notification
@@ -60,6 +61,7 @@ jobs:
 
   release:
     needs: build
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -105,7 +107,7 @@ jobs:
   finish:
     needs: release
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && github.event_name == 'release'
 
     steps:
       - name: Send Success Notification
