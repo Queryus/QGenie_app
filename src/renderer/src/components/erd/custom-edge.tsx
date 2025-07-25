@@ -1,4 +1,11 @@
+import type React from 'react'
 import { type EdgeProps, getBezierPath } from '@xyflow/react'
+
+export interface ErdEdgeProps extends EdgeProps {
+  data?: {
+    isHighlighted?: boolean
+  }
+}
 
 export function ErdEdge({
   id,
@@ -6,31 +13,59 @@ export function ErdEdge({
   sourceY,
   targetX,
   targetY,
-  sourcePosition,
-  targetPosition,
-  style = {},
-  markerEnd
-}: EdgeProps): React.JSX.Element {
+  data
+}: ErdEdgeProps): React.JSX.Element {
   const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
-    sourcePosition,
     targetX,
-    targetY,
-    targetPosition
+    targetY
   })
 
+  const isHighlighted = data?.isHighlighted || false
+
   return (
-    <>
+    <g>
+      {isHighlighted && (
+        <>
+          <path
+            d={edgePath}
+            fill="none"
+            stroke="#9F73FF"
+            strokeWidth={3}
+            strokeDasharray="none"
+            style={{
+              filter: 'blur(8px)',
+              opacity: 0.1
+            }}
+          />
+          <path
+            d={edgePath}
+            fill="none"
+            stroke="#9F73FF"
+            strokeWidth={3}
+            strokeDasharray="none"
+            style={{
+              filter: 'blur(8px)',
+              opacity: 0.1
+            }}
+          />
+        </>
+      )}
+
       <path
         id={id}
-        style={style}
-        className="react-flow__edge-path"
         d={edgePath}
-        markerEnd={markerEnd}
-        stroke="#374151"
-        strokeWidth={2}
+        fill="none"
+        stroke={isHighlighted ? '#9F73FF' : '#454545'}
+        strokeWidth={isHighlighted ? 2 : 1.5}
+        strokeDasharray="none"
+        className="transition-colors duration-300"
+        style={{
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round'
+        }}
       />
-    </>
+    </g>
   )
 }
