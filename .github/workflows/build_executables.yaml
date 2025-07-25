@@ -103,7 +103,7 @@ jobs:
   #    파이프라인 최종 결과 알림
   # ==================================
   finish:
-    needs: deploy
+    needs: release
     runs-on: ubuntu-latest
     if: always()
 
