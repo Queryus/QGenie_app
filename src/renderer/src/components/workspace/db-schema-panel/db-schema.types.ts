@@ -12,6 +12,8 @@ export interface SchemaNode {
 export interface SchemaTreeItemProps {
   node: SchemaNode
   level?: number
+  expandedNodes: Record<string, boolean>
+  onToggle: (nodeId: string) => void
 }
 
 export interface SchemaIconMap {
