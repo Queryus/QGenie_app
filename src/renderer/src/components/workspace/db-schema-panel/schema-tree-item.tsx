@@ -50,13 +50,15 @@ export default function SchemaTreeItem({
         style={{ paddingLeft: `${level * 1.5 + 0.25}rem` }}
         onClick={handleToggle}
       >
-        <ChevronRight
-          className={cn(
-            'size-3 transition-transform duration-200',
-            isExpanded ? 'rotate-90' : '',
-            hasChildren ? 'stroke-[#808080]' : 'stroke-transparent'
-          )}
-        />
+        <div className="size-3 flex items-center justify-center">
+          <ChevronRight
+            className={cn(
+              'size-3 transition-transform duration-200',
+              isExpanded ? 'rotate-90' : '',
+              hasChildren ? 'stroke-[#808080]' : 'stroke-transparent'
+            )}
+          />
+        </div>
         <div className="size-3 flex items-center justify-center">
           <IconComponent className={`size-3 ${ICON_COLORS[node.type]}`} />
         </div>
