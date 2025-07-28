@@ -1,167 +1,36 @@
 import type React from 'react'
-
-import { ErdEdge } from '@/components/erd/custom-edge'
 import TableNode from '@/components/erd/table-node'
+import { TableDetailSidebar } from '@/components/erd/table-detail-sidebar'
+import type { TableNodeData } from '@/components/erd/table-node'
 import {
   ReactFlow,
   Background,
   Controls,
-  type Node,
-  type Edge,
   useNodesState,
-  useEdgesState
+  useEdgesState,
+  useReactFlow,
+  ReactFlowProvider
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
+import { RelationshipEdge } from '@/components/erd/relationship-edge'
+import { CardinalityMarkers } from '@/components/erd/cardinarity-makers'
+import { initialEdges, initialNodes } from './erd.type'
 
 const nodeTypes = {
   table: TableNode
 }
 
 const edgeTypes = {
-  erd: ErdEdge
+  relationship: RelationshipEdge
 }
 
-const initialNodes: Node[] = [
-  {
-    id: 'users',
-    type: 'table',
-    position: { x: 100, y: 100 },
-    data: {
-      tableName: 'users',
-      columns: [
-        {
-          name: 'id',
-          type: 'BIGINT',
-          constraints: ['primary', 'not-null']
-        },
-        {
-          name: 'email',
-          type: 'VARCHAR(255)',
-          constraints: ['not-null', 'unique']
-        },
-        {
-          name: 'name',
-          type: 'VARCHAR(100)',
-          constraints: ['not-null']
-        },
-        {
-          name: 'created_at',
-          type: 'TIMESTAMP',
-          constraints: ['not-null']
-        },
-        {
-          name: 'updated_at',
-          type: 'TIMESTAMP',
-          constraints: ['nullable']
-        }
-      ]
-    }
-  },
-  {
-    id: 'posts',
-    type: 'table',
-    position: { x: 500, y: 100 },
-    data: {
-      tableName: 'posts',
-      columns: [
-        {
-          name: 'id',
-          type: 'BIGINT',
-          constraints: ['primary', 'not-null']
-        },
-        {
-          name: 'user_id',
-          type: 'BIGINT',
-          constraints: ['not-null', 'foreign', 'index']
-        },
-        {
-          name: 'title',
-          type: 'VARCHAR(255)',
-          constraints: ['not-null']
-        },
-        {
-          name: 'content',
-          type: 'TEXT',
-          constraints: []
-        },
-        {
-          name: 'published',
-          type: 'BOOLEAN',
-          constraints: ['not-null']
-        },
-        {
-          name: 'created_at',
-          type: 'TIMESTAMP',
-          constraints: ['not-null']
-        },
-        {
-          name: 'published_at',
-          type: 'TIMESTAMP',
-          constraints: ['nullable']
-        }
-      ]
-    }
-  },
-  {
-    id: 'comments',
-    type: 'table',
-    position: { x: 900, y: 100 },
-    data: {
-      tableName: 'comments',
-      columns: [
-        {
-          name: 'id',
-          type: 'BIGINT',
-          constraints: ['primary', 'not-null']
-        },
-        {
-          name: 'post_id',
-          type: 'BIGINT',
-          constraints: ['not-null', 'foreign', 'index']
-        },
-        {
-          name: 'user_id',
-          type: 'BIGINT',
-          constraints: ['not-null', 'foreign', 'index']
-        },
-        {
-          name: 'content',
-          type: 'TEXT',
-          constraints: ['not-null']
-        },
-        {
-          name: 'created_at',
-          type: 'TIMESTAMP',
-          constraints: ['not-null']
-        }
-      ]
-    }
-  }
-]
-
-const initialEdges: Edge[] = [
-  {
-    id: 'users-posts',
-    source: 'users',
-    sourceHandle: 'right',
-    target: 'posts',
-    targetHandle: 'left',
-    type: 'erd'
-  },
-  {
-    id: 'posts-comments',
-    source: 'posts',
-    sourceHandle: 'right',
-    target: 'comments',
-    targetHandle: 'left',
-    type: 'erd'
-  }
-]
-
-export default function ErdPage(): React.JSX.Element {
+function ErdContent(): React.JSX.Element {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [selectedTable, setSelectedTable] = useState<TableNodeData | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { fitBounds, getNode } = useReactFlow()
 
   const handleNodeHover = useCallback(
     (event: Event) => {
@@ -169,18 +38,15 @@ export default function ErdPage(): React.JSX.Element {
       const { nodeId, isHovering } = customEvent.detail
 
       if (isHovering) {
-        // 연결된 노드와 엣지 찾기
         const connectedEdges = edges.filter(
           (edge) => edge.source === nodeId || edge.target === nodeId
         )
         const connectedNodeIds = new Set<string>()
-
         connectedEdges.forEach((edge) => {
           connectedNodeIds.add(edge.source)
           connectedNodeIds.add(edge.target)
         })
 
-        // 노드 하이라이트 업데이트
         setNodes((prevNodes) =>
           prevNodes.map((node) => ({
             ...node,
@@ -191,7 +57,6 @@ export default function ErdPage(): React.JSX.Element {
           }))
         )
 
-        // 엣지 하이라이트 업데이트
         setEdges((prevEdges) =>
           prevEdges.map((edge) => ({
             ...edge,
@@ -202,7 +67,6 @@ export default function ErdPage(): React.JSX.Element {
           }))
         )
       } else {
-        // 모든 하이라이트 제거
         setNodes((prevNodes) =>
           prevNodes.map((node) => ({
             ...node,
@@ -227,44 +91,113 @@ export default function ErdPage(): React.JSX.Element {
     [edges, setNodes, setEdges]
   )
 
+  const handleNodeClick = useCallback(
+    (event: Event) => {
+      const customEvent = event as CustomEvent<{ nodeId: string; nodeData: TableNodeData }>
+      const { nodeId, nodeData } = customEvent.detail
+
+      const clickedNode = getNode(nodeId)
+      if (clickedNode) {
+        const nodeWidth = clickedNode.width ?? 200
+        const nodeHeight = clickedNode.height ?? 100
+        const offsetX = -300
+        const offsetY = -100
+
+        const bounds = {
+          x: clickedNode.position.x - offsetX,
+          y: clickedNode.position.y - offsetY,
+          width: nodeWidth,
+          height: nodeHeight
+        }
+
+        fitBounds(bounds, { duration: 800, padding: 9 })
+      }
+
+      setSelectedTable(nodeData)
+      setSidebarOpen(true)
+    },
+    [fitBounds, getNode]
+  )
+
+  const handleNodeMouseDown = useCallback(
+    (event: Event) => {
+      const customEvent = event as CustomEvent<{ nodeId: string; nodeData: TableNodeData }>
+      const { nodeId, nodeData } = customEvent.detail
+
+      const clickedNode = getNode(nodeId)
+      if (clickedNode) {
+        const filteredNodes = nodes.filter((node) => node.id !== clickedNode.id)
+        filteredNodes.push(clickedNode)
+        setNodes(filteredNodes)
+      }
+
+      setSelectedTable(nodeData)
+    },
+    [getNode, setNodes, nodes]
+  )
+
+  const handleCloseSidebar = useCallback(() => {
+    setSidebarOpen(false)
+    setTimeout(() => {
+      setSelectedTable(null)
+    }, 300)
+  }, [])
+
   useEffect(() => {
     window.addEventListener('nodeHover', handleNodeHover)
+    window.addEventListener('nodeClick', handleNodeClick)
+    window.addEventListener('nodeDown', handleNodeMouseDown)
+
     return () => {
       window.removeEventListener('nodeHover', handleNodeHover)
+      window.removeEventListener('nodeClick', handleNodeClick)
+      window.removeEventListener('nodeDown', handleNodeMouseDown)
     }
-  }, [handleNodeHover])
+  }, [handleNodeHover, handleNodeClick, handleNodeMouseDown])
 
   return (
-    <div className="w-full h-screen bg-zinc-900">
+    <div className="w-full h-screen bg-zinc-900 relative">
       <style>{`
         .react-flow__edge {
-          z-index: 10 !important;
+          z-index: 1 !important;
         }
         .react-flow__node {
-          z-index: 5 !important;
-        }
-        /* 기본 edge path 숨기기 */
-        .react-flow__edge-path[data-testid] {
-          display: none;
+          z-index: 10 !important;
         }
       `}</style>
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
-        style={{ background: '#18181b' }}
-        defaultEdgeOptions={{
-          style: { display: 'none' }
-        }}
+      <div
+        className={`transition-all duration-300 ease-in-out ${sidebarOpen ? 'mr-96' : 'mr-0'}`}
+        style={{ width: '100%', height: '100vh' }}
       >
-        <Controls showInteractive={false} />
-        <Background />
-      </ReactFlow>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          fitView
+          style={{ background: '#18181b' }}
+        >
+          <CardinalityMarkers />
+          <Controls showInteractive={false} />
+          <Background />
+        </ReactFlow>
+
+        <TableDetailSidebar
+          isOpen={sidebarOpen}
+          onClose={handleCloseSidebar}
+          tableData={selectedTable}
+        />
+      </div>
     </div>
+  )
+}
+
+export default function ErdPage(): React.JSX.Element {
+  return (
+    <ReactFlowProvider>
+      <ErdContent />
+    </ReactFlowProvider>
   )
 }

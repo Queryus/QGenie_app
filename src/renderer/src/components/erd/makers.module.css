@@ -1,0 +1,13 @@
+.wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+:root {
+  --pane-border-hover: #454545;
+  --node-layout: #9f73ff;
+}

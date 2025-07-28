@@ -1,0 +1,20 @@
+.edge {
+  stroke: #454545;
+  stroke-width: 1.5px;
+  fill: none;
+  transition: stroke 0.3s ease;
+  z-index: 1;
+}
+
+.edge.hovered {
+  stroke: #9f73ff;
+  filter: drop-shadow(0 0 8px rgba(159, 115, 255, 0.4));
+}
+
+.edge:hover {
+  stroke: #666666;
+}
+
+.edge.hovered:hover {
+  stroke: #9f73ff;
+}
