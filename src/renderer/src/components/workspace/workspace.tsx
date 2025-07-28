@@ -5,74 +5,21 @@ import {
   Code2,
   Copy,
   Download,
-  FolderOpen,
   History,
-  ListTree,
   Play,
   Save,
   Search,
   Send,
   Sparkles,
-  TableProperties,
   X
 } from 'lucide-react'
+import { DbSchemaPanel } from './db-schema-panel'
 
 const WorkSpace = (): React.JSX.Element => {
   return (
     <main className="flex flex-1 h-full bg-zinc-900 pt-2 pr-2 pb-2">
       {/* DB Schema Panel (Left) */}
-      <div className="w-56 h-full p-3 bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex-col justify-start items-start inline-flex">
-        <div
-          data-state="Default"
-          className="self-stretch p-1 rounded inline-flex justify-start items-center gap-2"
-        >
-          <ChevronRight className="size-3 rotate-90 stroke-[#808080]" />
-          <TableProperties className="stroke-[#808080] size-3" />
-          <div className="justify-start h-4 content-center text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
-            DEMO_DATA
-          </div>
-        </div>
-        <div className="self-stretch flex flex-col justify-start items-start">
-          <div
-            data-state="Default"
-            className="self-stretch pl-6 pr-1 py-1 rounded inline-flex justify-start items-center gap-2"
-          >
-            <ChevronRight className="size-3 rotate-90 stroke-[#808080]" />
-            <ListTree className="size-3 stroke-[#808080]" />
-            <div className="justify-start h-4 content-center text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
-              INFOMATION_SCHEMA
-            </div>
-          </div>
-          <div className="self-stretch flex flex-col justify-start items-start">
-            <div
-              data-state="Default"
-              className="self-stretch pl-11 pr-1 py-1 rounded inline-flex justify-start items-center gap-2"
-            >
-              <ChevronRight className="size-3 rotate-90 stroke-[#808080]" />
-              <FolderOpen className="size-3 stroke-[#73B2FF]" />
-              <div className="justify-start h-4 content-center text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
-                tables
-              </div>
-            </div>
-            <div className="self-stretch flex flex-col justify-start items-start">
-              {/* Table Items */}
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  data-state="Default"
-                  className="self-stretch pl-16 py-1 rounded inline-flex justify-start items-center gap-2"
-                >
-                  <ChevronRight className="size-3 rotate-90 stroke-[#808080]" />
-                  <TableProperties className="size-3 stroke-[#9F73FF]" />
-                  <div className="justify-start h-4 content-center text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
-                    ITEM
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <DbSchemaPanel />
 
       {/* Main Content (Center & Right) */}
       <div className="flex flex-1 h-full ml-2 gap-2">
