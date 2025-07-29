@@ -8,7 +8,7 @@ import { BotMessageSquare, ChevronRight, Send } from 'lucide-react'
 export default function ChatInput(): React.JSX.Element {
   return (
     <div className="self-stretch p-4 bg-neutral-800">
-      <div className="self-stretch p-4 bg-gradient-to-b from-stone-900 to-neutral-800 rounded-2xl outline-1 outline-offset-[-1px] outline-white/20 flex flex-col justify-start items-start gap-2">
+      <div className="self-stretch p-4 bg-gradient-to-b from-[#1d1d1d] to-[#272727] rounded-2xl outline-1 outline-offset-[-1px] outline-white/20 flex flex-col justify-start items-start gap-2">
         <div className="self-stretch justify-start text-zinc-500 text-xs font-medium font-['Pretendard'] leading-none">
           무엇이든 물어보세요!
         </div>

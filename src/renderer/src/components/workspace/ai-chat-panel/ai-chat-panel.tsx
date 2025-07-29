@@ -39,15 +39,16 @@ const MOCK_CHAT_DATA: ChatMessageData[] = [
  */
 export default function AiChatPanel(): React.JSX.Element {
   const [messages] = useState<ChatMessageData[]>(MOCK_CHAT_DATA)
+  const [searchTerm, setSearchTerm] = useState('')
   // TODO: 사용자 입력 상태 추가
   // const [input, setInput] = useState('')
 
   return (
     <div className="flex-1 h-full bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex flex-col">
-      <ChatHeader />
+      <ChatHeader onSearchChange={setSearchTerm} />
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6">
         {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
+          <ChatMessage key={message.id} message={message} highlightTerm={searchTerm} />
         ))}
       </div>
       <ChatInput />
