@@ -1,11 +1,14 @@
 import { RelationshipEdgeData } from '@/components/erd/type'
 import { Edge, Node } from '@xyflow/react'
 
+/**
+ * TODO: 관계를 보고 동적으로 position 결정하는 함수 제작
+ */
 export const initialNodes: Node[] = [
   {
     id: 'users',
     type: 'table',
-    position: { x: 100, y: 100 },
+    position: { x: 400, y: 0 },
     data: {
       tableName: 'users',
       columns: [
@@ -40,7 +43,7 @@ export const initialNodes: Node[] = [
   {
     id: 'posts',
     type: 'table',
-    position: { x: 500, y: 100 },
+    position: { x: 800, y: 0 },
     data: {
       tableName: 'posts',
       columns: [
@@ -85,7 +88,7 @@ export const initialNodes: Node[] = [
   {
     id: 'comments',
     type: 'table',
-    position: { x: 900, y: 100 },
+    position: { x: 1200, y: 0 },
     data: {
       tableName: 'comments',
       columns: [
@@ -120,7 +123,7 @@ export const initialNodes: Node[] = [
   {
     id: 'user_profiles',
     type: 'table',
-    position: { x: 100, y: 350 },
+    position: { x: 0, y: 0 },
     data: {
       tableName: 'user_profiles',
       columns: [
@@ -150,7 +153,7 @@ export const initialNodes: Node[] = [
   {
     id: 'tags',
     type: 'table',
-    position: { x: 500, y: 350 },
+    position: { x: 0, y: 400 },
     data: {
       tableName: 'tags',
       columns: [
@@ -175,7 +178,7 @@ export const initialNodes: Node[] = [
   {
     id: 'post_tags',
     type: 'table',
-    position: { x: 700, y: 250 },
+    position: { x: 1200, y: 400 },
     data: {
       tableName: 'post_tags',
       columns: [

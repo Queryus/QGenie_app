@@ -2,18 +2,21 @@ import type React from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { KeyRound, Link, Diamond, Table2 } from 'lucide-react'
 
+// 각 행에 랜더링 될 데이터
 export interface TableColumn {
   name: string
   type: string
   constraints: ('primary' | 'not-null' | 'foreign' | 'unique' | 'index' | 'nullable')[]
 }
 
+// 테이블 정보
 export interface TableNodeData extends Record<string, unknown> {
   tableName: string
   columns: TableColumn[]
   isHighlighted?: boolean
 }
 
+// 제약조건 아이콘
 const constraintIcons = {
   primary: KeyRound,
   foreign: Link,
@@ -21,6 +24,7 @@ const constraintIcons = {
   nullable: Diamond
 } as const
 
+// 제약조건 색상
 const constraintColors = {
   primary: 'text-[#9F73FF]',
   foreign: 'text-[#9F73FF]',
@@ -28,6 +32,7 @@ const constraintColors = {
   nullable: 'text-[#808080]'
 } as const
 
+// 가장 우선 순위가 높은 제약조건 리턴
 const getHighestPriorityConstraint = (
   constraints: string[]
 ): keyof typeof constraintIcons | null => {
@@ -40,9 +45,17 @@ const getHighestPriorityConstraint = (
   return null
 }
 
+/**
+ * 테이블 랜더링 함수
+ *
+ * @author 6-keem
+ * @param props 노드 및 테이블 정보
+ * @returns JSX.Element
+ */
 export default function TableNode(props: NodeProps & { data: TableNodeData }): React.JSX.Element {
   const { data, id } = props
 
+  // 테이블 호버링 => 하이라이트 효과
   const handleMouseEnter = (): void => {
     const event = new CustomEvent('nodeHover', {
       detail: { nodeId: id, isHovering: true }
@@ -50,6 +63,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
     window.dispatchEvent(event)
   }
 
+  // 테이블 호버링 취소 => 하이라이트 효과 취소
   const handleMouseLeave = (): void => {
     const event = new CustomEvent('nodeHover', {
       detail: { nodeId: id, isHovering: false }
@@ -57,6 +71,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
     window.dispatchEvent(event)
   }
 
+  // 클릭 => 오른쪽 어노테이션 탭 열기
   const handleClick = (): void => {
     const event = new CustomEvent('nodeClick', {
       detail: { nodeId: id, nodeData: data }
@@ -64,6 +79,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
     window.dispatchEvent(event)
   }
 
+  // 클릭 => 테이블 맨 위로 올리기 (다른 테이블에 가려지는 문제)
   const handleMouseDown = (): void => {
     const event = new CustomEvent('nodeDown', {
       detail: { nodeId: id, nodeData: data }
@@ -71,6 +87,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
     window.dispatchEvent(event)
   }
 
+  // 하이라이트 효과 적용 여부
   const getNodeStyles = (): string => {
     if (data.isHighlighted) {
       return 'bg-[#1c1c1c] border-1 border-[#9F73FF] rounded-md shadow-lg min-w-[250px] transition-all duration-200 relative z-10'
@@ -171,6 +188,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
             </div>
 
             <span className="font-medium text-[#E4E4E4] flex-1">{column.name}</span>
+            {/* 호버링 => 천천히 보이게 */}
             <span
               className={`text-sm text-[#808080] transition-all duration-300 overflow-hidden inline-block ${
                 data.isHighlighted ? 'opacity-100' : 'opacity-0'

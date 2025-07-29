@@ -5,7 +5,6 @@ import type { TableNodeData } from '@/components/erd/table-node'
 import {
   ReactFlow,
   Background,
-  Controls,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -16,6 +15,7 @@ import { useEffect, useCallback, useState } from 'react'
 import { RelationshipEdge } from '@/components/erd/relationship-edge'
 import { CardinalityMarkers } from '@/components/erd/cardinarity-makers'
 import { initialEdges, initialNodes } from './erd.type'
+import { Sidebar } from '@/components/layout/side-bar'
 
 const nodeTypes = {
   table: TableNode
@@ -25,6 +25,13 @@ const edgeTypes = {
   relationship: RelationshipEdge
 }
 
+/**
+ * ERD 페이지 컨텐트
+ *
+ * @author 6-keem
+ *
+ * @returns JSX.Element
+ */
 function ErdContent(): React.JSX.Element {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -32,6 +39,7 @@ function ErdContent(): React.JSX.Element {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { fitBounds, getNode } = useReactFlow()
 
+  // 호버링 => 관계 되는 nodes, edges 하이라이팅
   const handleNodeHover = useCallback(
     (event: Event) => {
       const customEvent = event as CustomEvent<{ nodeId: string; isHovering: boolean }>
@@ -91,6 +99,7 @@ function ErdContent(): React.JSX.Element {
     [edges, setNodes, setEdges]
   )
 
+  // 노드 클릭 => 해당 노드로 화면 이동 & 어노테이션 탭 열기
   const handleNodeClick = useCallback(
     (event: Event) => {
       const customEvent = event as CustomEvent<{ nodeId: string; nodeData: TableNodeData }>
@@ -119,6 +128,7 @@ function ErdContent(): React.JSX.Element {
     [fitBounds, getNode]
   )
 
+  // 클릭 => 해당 노드 최상단으로 배치
   const handleNodeMouseDown = useCallback(
     (event: Event) => {
       const customEvent = event as CustomEvent<{ nodeId: string; nodeData: TableNodeData }>
@@ -126,6 +136,7 @@ function ErdContent(): React.JSX.Element {
 
       const clickedNode = getNode(nodeId)
       if (clickedNode) {
+        // 배열 후미로 이동시키면 zIndex 올린 것과 동일 효과
         const filteredNodes = nodes.filter((node) => node.id !== clickedNode.id)
         filteredNodes.push(clickedNode)
         setNodes(filteredNodes)
@@ -136,6 +147,7 @@ function ErdContent(): React.JSX.Element {
     [getNode, setNodes, nodes]
   )
 
+  // 사이드바 (어노테이션 탭) 닫을때 애니메이션
   const handleCloseSidebar = useCallback(() => {
     setSidebarOpen(false)
     setTimeout(() => {
@@ -143,6 +155,7 @@ function ErdContent(): React.JSX.Element {
     }, 300)
   }, [])
 
+  // 이벤트 등록
   useEffect(() => {
     window.addEventListener('nodeHover', handleNodeHover)
     window.addEventListener('nodeClick', handleNodeClick)
@@ -180,7 +193,6 @@ function ErdContent(): React.JSX.Element {
           style={{ background: '#18181b' }}
         >
           <CardinalityMarkers />
-          <Controls showInteractive={false} />
           <Background />
         </ReactFlow>
 
@@ -194,10 +206,17 @@ function ErdContent(): React.JSX.Element {
   )
 }
 
+/**
+ * 최상위 ERD 페이지 컴포넌트
+ * ReactFlowProvider로 전체 상태 공유
+ */
 export default function ErdPage(): React.JSX.Element {
   return (
     <ReactFlowProvider>
-      <ErdContent />
+      <div className="w-screen h-screen bg-zinc-900 flex overflow-hidden">
+        <Sidebar />
+        <ErdContent />
+      </div>
     </ReactFlowProvider>
   )
 }

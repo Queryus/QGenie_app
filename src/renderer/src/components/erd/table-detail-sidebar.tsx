@@ -18,12 +18,14 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { TableNodeData } from './table-node'
 
+// 사이드바 상태
 interface TableDetailSidebarProps {
   isOpen: boolean
   onClose: () => void
   tableData: TableNodeData | null
 }
 
+// TODO: 테이블과 제약 조건 아이콘 통일
 const constraintIcons = {
   primary: KeyRound,
   foreign: Link,
@@ -33,6 +35,7 @@ const constraintIcons = {
   index: Database
 } as const
 
+// 제약 조건들 색상
 const constraintColors = {
   primary: 'text-yellow-400 bg-yellow-400/10',
   foreign: 'text-blue-400 bg-blue-400/10',
@@ -42,6 +45,7 @@ const constraintColors = {
   index: 'text-purple-400 bg-purple-400/10'
 } as const
 
+// 제약 조건 표시
 const constraintLabels = {
   primary: 'Primary Key',
   foreign: 'Foreign Key',
@@ -51,6 +55,7 @@ const constraintLabels = {
   index: 'Index'
 } as const
 
+// 속성 타입에 따라서 아이콘 전달
 const getTypeIcon = (
   type: string
 ): React.ForwardRefExoticComponent<
@@ -62,6 +67,8 @@ const getTypeIcon = (
   return Database
 }
 
+// 속성 타입에 따라서 색상 전달
+
 const getTypeColor = (type: string): string => {
   if (type.includes('VARCHAR') || type.includes('TEXT')) return 'text-green-400'
   if (type.includes('INT') || type.includes('BIGINT')) return 'text-blue-400'
@@ -70,6 +77,15 @@ const getTypeColor = (type: string): string => {
   return 'text-gray-400'
 }
 
+/**
+ * 테이블 선택 시 오른쪽에 랜더링 되는 사이드바 (어노테이션)
+ *
+ * @author 6-keem
+ * @param isOpen 열림 상태
+ * @param onClose 닫기 콜백 함수
+ * @param tableData 현재 선택된 테이블 데이터
+ * @returns JSX.Element
+ */
 export function TableDetailSidebar({
   isOpen,
   onClose,

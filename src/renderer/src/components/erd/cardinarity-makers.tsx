@@ -5,6 +5,13 @@ import { CardinalityZeroOrManyLeftMarker } from './makers/zero-or-many-left'
 import { CardinalityZeroOrOneRightMarker } from './makers/zero-or-one-right'
 import { CardinalityZeroOrManyRightMarker } from './makers/zero-or-many-right'
 
+/**
+ * 테이블 양쪽 관계 표시 함수
+ *
+ * @author 6-keem
+ *
+ * @returns React.FunctionComponent<P>
+ */
 export const CardinalityMarkers: FC = () => {
   return (
     <div className={styles.wrapper}>
