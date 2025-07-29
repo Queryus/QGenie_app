@@ -7,6 +7,7 @@ export interface TableColumn {
   name: string
   type: string
   constraints: ('primary' | 'not-null' | 'foreign' | 'unique' | 'index' | 'nullable')[]
+  description?: string
 }
 
 // 테이블 정보

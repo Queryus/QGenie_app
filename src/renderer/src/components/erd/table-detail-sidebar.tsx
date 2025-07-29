@@ -166,6 +166,15 @@ export function TableDetailSidebar({
                                 {column.type}
                               </Badge>
                             </div>
+                            {column.description !== null && (
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <span className="font-normal text-[#d3d3d3]">
+                                    {column.description}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
 
                             {column.constraints.length > 0 && (
                               <div className="flex flex-wrap gap-1">

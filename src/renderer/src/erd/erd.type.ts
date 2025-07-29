@@ -15,12 +15,14 @@ export const initialNodes: Node[] = [
         {
           name: 'id',
           type: 'BIGINT',
-          constraints: ['primary', 'not-null']
+          constraints: ['primary', 'not-null'],
+          description: '사용자 고유 아이디'
         },
         {
           name: 'email',
           type: 'VARCHAR(255)',
-          constraints: ['not-null', 'unique']
+          constraints: ['not-null', 'unique'],
+          description: '가입 시 사용한 이메일 주소'
         },
         {
           name: 'name',
@@ -212,7 +214,7 @@ export const initialEdges: Edge<RelationshipEdgeData>[] = [
     type: 'relationship',
     data: {
       cardinality: 'ONE_TO_MANY',
-      label: 'has many'
+      label: '관계 라벨'
     }
   },
   {
@@ -223,8 +225,7 @@ export const initialEdges: Edge<RelationshipEdgeData>[] = [
     targetHandle: 'left-1',
     type: 'relationship',
     data: {
-      cardinality: 'ONE_TO_MANY',
-      label: 'has many'
+      cardinality: 'ONE_TO_MANY'
     }
   },
   {
@@ -235,8 +236,7 @@ export const initialEdges: Edge<RelationshipEdgeData>[] = [
     targetHandle: 'left-1',
     type: 'relationship',
     data: {
-      cardinality: 'ONE_TO_ONE',
-      label: 'belongs to'
+      cardinality: 'ONE_TO_ONE'
     }
   },
   {
@@ -247,8 +247,7 @@ export const initialEdges: Edge<RelationshipEdgeData>[] = [
     targetHandle: 'left-1',
     type: 'relationship',
     data: {
-      cardinality: 'ONE_TO_MANY',
-      label: 'has many'
+      cardinality: 'ONE_TO_MANY'
     }
   },
   {
@@ -259,8 +258,7 @@ export const initialEdges: Edge<RelationshipEdgeData>[] = [
     targetHandle: 'left-2',
     type: 'relationship',
     data: {
-      cardinality: 'ONE_TO_MANY',
-      label: 'has many'
+      cardinality: 'ONE_TO_MANY'
     }
   },
   {
@@ -271,8 +269,7 @@ export const initialEdges: Edge<RelationshipEdgeData>[] = [
     targetHandle: 'left-2',
     type: 'relationship',
     data: {
-      cardinality: 'ONE_TO_MANY',
-      label: 'wrote'
+      cardinality: 'ONE_TO_MANY'
     }
   }
 ]
