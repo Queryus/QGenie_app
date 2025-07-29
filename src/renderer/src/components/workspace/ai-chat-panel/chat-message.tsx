@@ -54,7 +54,7 @@ const HighlightedText = ({
             .map((part, j) => {
               const isMatch = part.toLowerCase() === trimmedHighlight.toLowerCase()
               return isMatch ? (
-                <mark key={j} className="bg-yellow-400 text-black rounded-sm">
+                <mark key={j} className="bg-violet-500/80 text-violet-100 rounded-sm">
                   {part}
                 </mark>
               ) : (
