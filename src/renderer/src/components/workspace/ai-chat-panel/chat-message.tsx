@@ -73,19 +73,19 @@ export default function ChatMessage({ message }: ChatMessageProps): React.JSX.El
           <div className="inline-flex justify-start items-start gap-2.5">
             <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
               <Play className="size-4 stroke-[#E4E4E4]" />
-              <div className="justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
+              <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 실행
               </div>
             </div>
             <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
               <Copy className="size-4 stroke-[#E4E4E4]" />
-              <div className="justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
+              <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 복사
               </div>
             </div>
             <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
               <Save className="size-4 stroke-[#E4E4E4]" />
-              <div className="justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
+              <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 저장
               </div>
             </div>

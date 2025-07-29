@@ -21,7 +21,7 @@ export default function ChatInput(): React.JSX.Element {
             <ChevronRight className="size-3 stroke-[#E4E4E4]" />
           </div>
           <div className="px-3 py-1.5 bg-gradient-to-b from-neutral-700 to-zinc-800 rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2">
-            <div className="justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
+            <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
               전송하기
             </div>
             <Send className="size-3 stroke-[#E4E4E4]" />
