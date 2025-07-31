@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 interface ChatMessageProps {
   message: ChatMessageData
   highlightTerm?: string
+  onSuggestionClick: (suggestion: string) => void
 }
 
 /**
@@ -77,7 +78,8 @@ const HighlightedText = ({
  */
 export default function ChatMessage({
   message,
-  highlightTerm = ''
+  highlightTerm = '',
+  onSuggestionClick
 }: ChatMessageProps): React.JSX.Element {
   const { sender, content, sql, suggestions } = message
 
@@ -95,7 +97,8 @@ export default function ChatMessage({
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
-                className="px-3 py-1.5 bg-gradient-to-b from-neutral-700 to-zinc-800 rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2"
+                onClick={() => onSuggestionClick(suggestion)}
+                className="px-3 py-1.5 bg-gradient-to-b from-neutral-700 to-zinc-800 rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2 hover:cursor-pointer"
               >
                 <Sparkles className="size-3 stroke-[#E4E4E4]" />
                 <div className="justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">

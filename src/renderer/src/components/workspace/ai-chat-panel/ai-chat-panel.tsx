@@ -41,6 +41,7 @@ const MOCK_CHAT_DATA: ChatMessageData[] = [
 export default function AiChatPanel(): React.JSX.Element {
   const [messages, setMessages] = useState<ChatMessageData[]>(MOCK_CHAT_DATA)
   const [searchTerm, setSearchTerm] = useState('')
+  const [input, setInput] = useState('')
 
   const handleSendMessage = (content: string): void => {
     const userMessage: ChatMessageData = {
@@ -50,6 +51,7 @@ export default function AiChatPanel(): React.JSX.Element {
       timestamp: new Date().toISOString()
     }
     setMessages((prevMessages) => [...prevMessages, userMessage])
+    setInput('')
 
     // TODO: 실제 AI API 연결
     // Mock AI Response
@@ -70,10 +72,15 @@ export default function AiChatPanel(): React.JSX.Element {
       <ChatHeader onSearchChange={setSearchTerm} />
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6">
         {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} highlightTerm={searchTerm} />
+          <ChatMessage
+            key={message.id}
+            message={message}
+            highlightTerm={searchTerm}
+            onSuggestionClick={setInput}
+          />
         ))}
       </div>
-      <ChatInput onSendMessage={handleSendMessage} />
+      <ChatInput value={input} onChange={setInput} onSendMessage={handleSendMessage} />
     </div>
   )
 }

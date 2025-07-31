@@ -1,7 +1,9 @@
 import { BotMessageSquare, ChevronRight, Send } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 
 interface ChatInputProps {
+  value: string
+  onChange: (value: string) => void
   onSendMessage: (content: string) => void
 }
 
@@ -10,8 +12,11 @@ interface ChatInputProps {
  * @summary AI 채팅 메시지 입력창
  * @returns JSX.Element
  */
-export default function ChatInput({ onSendMessage }: ChatInputProps): React.JSX.Element {
-  const [input, setInput] = useState('')
+export default function ChatInput({
+  value,
+  onChange,
+  onSendMessage
+}: ChatInputProps): React.JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -19,12 +24,11 @@ export default function ChatInput({ onSendMessage }: ChatInputProps): React.JSX.
       textareaRef.current.style.height = 'auto'
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
-  }, [input])
+  }, [value])
 
   const handleSend = (): void => {
-    if (input.trim()) {
-      onSendMessage(input)
-      setInput('')
+    if (value.trim()) {
+      onSendMessage(value)
     }
   }
 
@@ -40,8 +44,8 @@ export default function ChatInput({ onSendMessage }: ChatInputProps): React.JSX.
       <div className="self-stretch p-4 bg-gradient-to-b from-[#1d1d1d] to-[#272727] rounded-2xl outline-1 outline-offset-[-1px] outline-white/20 flex flex-col justify-start items-start gap-2">
         <textarea
           ref={textareaRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="무엇이든 물어보세요!"
           className="self-stretch bg-transparent text-neutral-200 text-xs font-medium font-['Pretendard'] leading-[14px] placeholder:text-zinc-500 focus:outline-none resize-none max-h-[44px] overflow-y-auto"
@@ -58,7 +62,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps): React.JSX.
           <button
             type="button"
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!value.trim()}
             className="px-3 py-1.5 bg-gradient-to-b from-neutral-700 to-zinc-800 rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
           >
             <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
