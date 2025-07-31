@@ -1,5 +1,5 @@
 import { BotMessageSquare, ChevronRight, Send } from 'lucide-react'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, forwardRef } from 'react'
 
 interface ChatInputProps {
   value: string
@@ -12,19 +12,20 @@ interface ChatInputProps {
  * @summary AI 채팅 메시지 입력창
  * @returns JSX.Element
  */
-export default function ChatInput({
-  value,
-  onChange,
-  onSendMessage
-}: ChatInputProps): React.JSX.Element {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(function ChatInput(
+  { value, onChange, onSendMessage },
+  ref
+) {
+  const internalTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    const textarea =
+      (ref as React.RefObject<HTMLTextAreaElement>)?.current || internalTextareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
     }
-  }, [value])
+  }, [value, ref])
 
   const handleSend = (): void => {
     if (value.trim()) {
@@ -43,7 +44,7 @@ export default function ChatInput({
     <div className="self-stretch p-4 bg-neutral-800">
       <div className="self-stretch p-4 bg-gradient-to-b from-[#1d1d1d] to-[#272727] rounded-2xl outline-1 outline-offset-[-1px] outline-white/20 flex flex-col justify-start items-start gap-2">
         <textarea
-          ref={textareaRef}
+          ref={ref || internalTextareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -74,4 +75,6 @@ export default function ChatInput({
       </div>
     </div>
   )
-}
+})
+
+export default ChatInput

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import ChatHeader from './chat-header'
 import ChatInput from './chat-input'
 import ChatMessage from './chat-message'
@@ -42,6 +42,12 @@ export default function AiChatPanel(): React.JSX.Element {
   const [messages, setMessages] = useState<ChatMessageData[]>(MOCK_CHAT_DATA)
   const [searchTerm, setSearchTerm] = useState('')
   const [input, setInput] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const handleSuggestionClick = (suggestion: string): void => {
+    setInput(suggestion)
+    textareaRef.current?.focus()
+  }
 
   const handleSendMessage = (content: string): void => {
     const userMessage: ChatMessageData = {
@@ -76,11 +82,16 @@ export default function AiChatPanel(): React.JSX.Element {
             key={message.id}
             message={message}
             highlightTerm={searchTerm}
-            onSuggestionClick={setInput}
+            onSuggestionClick={handleSuggestionClick}
           />
         ))}
       </div>
-      <ChatInput value={input} onChange={setInput} onSendMessage={handleSendMessage} />
+      <ChatInput
+        ref={textareaRef}
+        value={input}
+        onChange={setInput}
+        onSendMessage={handleSendMessage}
+      />
     </div>
   )
 }
