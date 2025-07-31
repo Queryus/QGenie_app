@@ -3,6 +3,7 @@ import ChatHeader from './chat-header'
 import ChatInput from './chat-input'
 import ChatMessage from './chat-message'
 import { ChatMessageData } from './ai-chat.types'
+import { v4 as uuidv4 } from 'uuid'
 
 // TODO: 실제 채팅 데이터로 교체
 const MOCK_CHAT_DATA: ChatMessageData[] = [
@@ -38,10 +39,31 @@ const MOCK_CHAT_DATA: ChatMessageData[] = [
  * @returns JSX.Element
  */
 export default function AiChatPanel(): React.JSX.Element {
-  const [messages] = useState<ChatMessageData[]>(MOCK_CHAT_DATA)
+  const [messages, setMessages] = useState<ChatMessageData[]>(MOCK_CHAT_DATA)
   const [searchTerm, setSearchTerm] = useState('')
-  // TODO: 사용자 입력 상태 추가
-  // const [input, setInput] = useState('')
+
+  const handleSendMessage = (content: string): void => {
+    const userMessage: ChatMessageData = {
+      id: uuidv4(),
+      sender: 'user',
+      content,
+      timestamp: new Date().toISOString()
+    }
+    setMessages((prevMessages) => [...prevMessages, userMessage])
+
+    // TODO: 실제 AI API 연결
+    // Mock AI Response
+    setTimeout(() => {
+      const aiMessage: ChatMessageData = {
+        id: uuidv4(),
+        sender: 'ai',
+        content: `"${content}"에 대한 모의 응답입니다.`,
+        sql: `SELECT * FROM your_table WHERE condition = 'mock_condition';`,
+        timestamp: new Date().toISOString()
+      }
+      setMessages((prevMessages) => [...prevMessages, aiMessage])
+    }, 1000)
+  }
 
   return (
     <div className="flex-1 h-full bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex flex-col">
@@ -51,7 +73,7 @@ export default function AiChatPanel(): React.JSX.Element {
           <ChatMessage key={message.id} message={message} highlightTerm={searchTerm} />
         ))}
       </div>
-      <ChatInput />
+      <ChatInput onSendMessage={handleSendMessage} />
     </div>
   )
 }
