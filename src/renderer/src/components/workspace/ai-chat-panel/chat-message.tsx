@@ -1,11 +1,10 @@
-import { Copy, Play, Save, Sparkles } from 'lucide-react'
-import { ChatMessageData } from './ai-chat.types'
+import { Copy, Play, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Message } from '@ai-sdk/react'
 
 interface ChatMessageProps {
-  message: ChatMessageData
+  message: Message
   highlightTerm?: string
-  onSuggestionClick: (suggestion: string) => void
 }
 
 /**
@@ -78,13 +77,19 @@ const HighlightedText = ({
  */
 export default function ChatMessage({
   message,
-  highlightTerm = '',
-  onSuggestionClick
+  highlightTerm = ''
 }: ChatMessageProps): React.JSX.Element {
-  const { sender, content, sql, suggestions } = message
+  const { role, content } = message
 
-  const isUser = sender === 'user'
-  const isSystem = sender === 'system'
+  const isUser = role === 'user'
+  const isSystem = role === 'system'
+  const isAi = role === 'assistant'
+
+  // 임시: content에서 SQL 부분만 추출 (실제로는 더 정교한 파싱 필요)
+  const sqlMatch = content.match(/```sql\n([\s\S]*?)\n```/)
+  const mainContent = sqlMatch ? content.replace(sqlMatch[0], '').trim() : content
+
+  const sql = sqlMatch ? sqlMatch[1].trim() : null
 
   if (isSystem) {
     return (
@@ -92,22 +97,6 @@ export default function ChatMessage({
         <div className="self-stretch justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
           <HighlightedText text={content} highlight={highlightTerm} />
         </div>
-        {suggestions && (
-          <div className="self-stretch inline-flex justify-start items-center gap-3 flex-wrap">
-            {suggestions.map((suggestion, index) => (
-              <div
-                key={index}
-                onClick={() => onSuggestionClick(suggestion)}
-                className="px-3 py-1.5 bg-gradient-to-b from-neutral-700 to-zinc-800 rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2 hover:cursor-pointer"
-              >
-                <Sparkles className="size-3 stroke-[#E4E4E4]" />
-                <div className="justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-                  {suggestion}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     )
   }
@@ -119,16 +108,17 @@ export default function ChatMessage({
         isUser ? 'items-end' : 'items-start'
       )}
     >
-      {!isUser && (
-        <div className="self-stretch justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-          <HighlightedText text={content} highlight={highlightTerm} />
-        </div>
-      )}
-      {isUser && (
-        <div className="w-fit max-w-md px-3 py-1.5 bg-gradient-to-b from-neutral-700 to-zinc-800 rounded-lg outline-1 outline-offset-[-1px] outline-white/20 inline-flex justify-center items-center gap-2.5">
-          <div className="flex justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-            <HighlightedText text={content} highlight={highlightTerm} />
-          </div>
+      {(isAi || isUser) && mainContent && (
+        <div
+          className={cn(
+            "w-fit max-w-md px-3 py-1.5 rounded-lg text-xs font-medium font-['Pretendard'] leading-none",
+            isUser
+              ? 'bg-gradient-to-b from-neutral-700 to-zinc-800 outline-1 outline-offset-[-1px] outline-white/20'
+              : '',
+            isAi ? 'text-neutral-200' : 'text-neutral-200'
+          )}
+        >
+          <HighlightedText text={mainContent} highlight={highlightTerm} />
         </div>
       )}
       {sql && (
