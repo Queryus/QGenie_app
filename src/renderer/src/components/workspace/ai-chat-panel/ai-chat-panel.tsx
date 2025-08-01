@@ -18,7 +18,7 @@ const initialSuggestions = [
  */
 export default function AiChatPanel(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const { messages, input, handleInputChange, handleSubmit, setInput } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, setInput, isLoading } = useChat({
     api: '/api/chat',
     streamProtocol: 'text', // TODO: AI 팀에서 받아올 때는 data로 변경해야함
     initialMessages: [
@@ -66,7 +66,12 @@ export default function AiChatPanel(): React.JSX.Element {
         ))}
       </div>
       <form onSubmit={handleSubmit}>
-        <ChatInput ref={textareaRef} value={input} onChange={handleInputChange} />
+        <ChatInput
+          ref={textareaRef}
+          value={input}
+          onChange={handleInputChange}
+          isLoading={isLoading}
+        />
       </form>
     </div>
   )
