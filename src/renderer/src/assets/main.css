@@ -1,8 +1,185 @@
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Thin.woff')
+    format('woff');
+  font-weight: 100;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraLight.woff')
+    format('woff');
+  font-weight: 200;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff')
+    format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff')
+    format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff')
+    format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff')
+    format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraBold.woff')
+    format('woff');
+  font-weight: 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Black.woff')
+    format('woff');
+  font-weight: 900;
+  font-style: normal;
+}
+
 @import 'tailwindcss';
+@plugin "tailwindcss-animate";
+
 @layer base {
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
+}
+
+@theme {
+  --color-genie-100: #e4e4e4;
+  --color-genie-200: #d3d3d3;
+  --color-genie-500: #808080;
+  --color-genie-600: #454545;
+  --color-genie-700: #393939;
+  --color-genie-800: #272727;
+  --color-genie-900: #1c1c1c;
+
+  --color-gradient-genie-from-gray: #454545;
+  --color-gradient-genie-to-gray: #333333;
+  --color-gradient-genie-from-primary: #4f19ff;
+  --color-gradient-genie-to-primary: #4400d6;
+
+  --color-primary: #4900e7;
+  --color-primary-light: #9f73ff;
+  --color-error: #e2378c;
+
+  --color-border-secondary: #393939;
+
+  --color-tag-required-bg: rgba(159, 115, 255, 0.2);
+  --color-tag-required-text: #9f73ff;
+  --color-tag-unique-bg: rgba(115, 178, 255, 0.2);
+  --color-tag-unique-text: #73b2ff;
+
+  --font-family-pretendard: 'Pretendard', system-ui, sans-serif;
+  --font-family-code: 'JetBrains Mono', monospace;
+
+  --font-size-heading: 16px;
+  --line-height-heading: 24px;
+  --font-weight-heading: 700;
+
+  --font-size-title: 14px;
+  --line-height-title: 21px;
+  --font-weight-title: 700;
+
+  --font-size-body: 12px;
+  --line-height-body: 18px;
+  --font-weight-body: 500;
+
+  --font-size-caption: 11px;
+  --line-height-caption: 16px;
+  --font-weight-caption: 600;
+
+  --font-size-code: 14px;
+  --line-height-code: 19px;
+  --font-weight-code: 400;
+
+  --font-size-button: 12px;
+  --line-height-button: 18px;
+  --font-weight-button: 600;
+}
+
+@utility text-heading {
+  font-size: var(--font-size-heading);
+  line-height: var(--line-height-heading);
+  font-weight: var(--font-weight-heading);
+}
+
+@utility text-title {
+  font-size: var(--font-size-title);
+  line-height: var(--line-height-title);
+  font-weight: var(--font-weight-title);
+}
+
+@utility text-body {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-body);
+}
+
+@utility text-caption {
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+  font-weight: var(--font-weight-caption);
+}
+
+@utility text-code {
+  font-size: var(--font-size-code);
+  line-height: var(--line-height-code);
+  font-weight: var(--font-weight-code);
+}
+
+@utility text-button {
+  font-size: var(--font-size-button);
+  line-height: var(--line-height-button);
+  font-weight: var(--font-weight-button);
+}
+
+@utility border-primary-gradient {
+  border-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.07) 50%)
+    1;
+}
+
+@utility font-pretendard {
+  font-family: var(--font-family-pretendard);
+}
+
+@utility font-code {
+  font-family: var(--font-family-code);
+}
+
+@utility bg-gradient-genie-gray {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-gradient-genie-from-gray),
+    var(--color-gradient-genie-to-gray)
+  );
+}
+
+@utility bg-gradient-genie-primary {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-gradient-genie-from-primary),
+    var(--color-gradient-genie-to-primary)
+  );
 }
