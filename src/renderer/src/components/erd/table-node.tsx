@@ -27,10 +27,10 @@ const constraintIcons = {
 
 // 제약조건 색상
 const constraintColors = {
-  primary: 'text-[#9F73FF]',
-  foreign: 'text-[#9F73FF]',
-  'not-null': 'text-[#808080]',
-  nullable: 'text-[#808080]'
+  primary: 'text-primary-light',
+  foreign: 'text-primary-light',
+  'not-null': 'text-genie-500',
+  nullable: 'text-genie-500'
 } as const
 
 // 가장 우선 순위가 높은 제약조건 리턴
@@ -91,9 +91,9 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
   // 하이라이트 효과 적용 여부
   const getNodeStyles = (): string => {
     if (data.isHighlighted) {
-      return 'bg-[#1c1c1c] border-1 border-[#9F73FF] rounded-md shadow-lg min-w-[250px] transition-all duration-200 relative z-10'
+      return 'bg-genie-900 border-1 border-primary-light rounded-md shadow-lg min-w-[250px] transition-all duration-200 relative z-10'
     }
-    return 'bg-[#1c1c1c] border border-[#393939] rounded-md shadow-lg min-w-[250px] hover:border-[#9F73FF] hover:shadow-[0_0_20px_rgba(159,115,255,0.4)] transition-all duration-200 relative z-10'
+    return 'bg-genie-900 border border-genie-700 rounded-md shadow-lg min-w-[250px] hover:border-primary-light hover:shadow-[0_0_20px_rgba(159,115,255,0.4)] transition-all duration-200 relative z-10'
   }
 
   const getGlowStyle = (): React.CSSProperties => {
@@ -155,7 +155,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
 
       {createHandles(Position.Right, 'right')}
 
-      <div className="flex bg-[#272727] text-white px-4 py-2 rounded-t-lg font-bold gap-1.5">
+      <div className="flex bg-genie-800 text-white px-4 py-2 rounded-t-lg font-bold gap-1.5">
         <div className="flex w-5">
           <Table2 />
         </div>
@@ -166,7 +166,7 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
         {data.columns.map((column, index) => (
           <div
             key={index}
-            className="px-4 py-2 flex items-center gap-1.5 hover:bg-[#454545] transition duration-300"
+            className="px-4 py-2 flex items-center gap-1.5 hover:bg-genie-600 transition duration-300"
           >
             <div className="flex gap-1 w-5">
               {(() => {
@@ -188,10 +188,10 @@ export default function TableNode(props: NodeProps & { data: TableNodeData }): R
               })()}
             </div>
 
-            <span className="font-medium text-[#E4E4E4] flex-1">{column.name}</span>
+            <span className="font-medium text-genie-100 flex-1">{column.name}</span>
             {/* 호버링 => 천천히 보이게 */}
             <span
-              className={`text-sm text-[#808080] transition-all duration-300 overflow-hidden inline-block ${
+              className={`text-sm text-genie-500 transition-all duration-300 overflow-hidden inline-block ${
                 data.isHighlighted ? 'opacity-100' : 'opacity-0'
               }`}
             >

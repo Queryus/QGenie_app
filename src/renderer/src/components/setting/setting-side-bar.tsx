@@ -38,16 +38,16 @@ export default function SettingSideBar({
   setActiveTab
 }: SettingSideBarProp): React.JSX.Element {
   return (
-    <div className="flex-[1] w-full bg-[#1c1c1c] self-stretch px-4 py-6 inline-flex flex-col justify-start items-start gap-2">
+    <div className="flex-[1] w-full bg-genie-900 self-stretch px-4 py-6 inline-flex flex-col justify-start items-start gap-2">
       {SETTING_ITEMS.map((settingItem) => {
         return (
           <div
             key={settingItem.key}
-            className={`w-full text-[#808080]  px-4 py-2 rounded-sm inline-flex justify-start items-center gap-4 transition duration-200 cursor-pointer hover:bg-[#272727] ${activeTab === settingItem.key && 'bg-[#272727]'}`}
+            className={`w-full text-genie-500  px-4 py-2 rounded-sm inline-flex justify-start items-center gap-4 transition duration-200 cursor-pointer hover:bg-genie-800 ${activeTab === settingItem.key && 'bg-genie-800'}`}
             onClick={() => setActiveTab(settingItem.key)}
           >
             {settingItem.icon}
-            <div className="justify-start text-[#e3e3e3] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
               {settingItem.label}
             </div>
           </div>
