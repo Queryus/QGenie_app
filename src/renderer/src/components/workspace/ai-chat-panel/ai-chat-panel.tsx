@@ -100,7 +100,8 @@ export default function AiChatPanel(): React.JSX.Element {
           ref={textareaRef}
           value={input}
           onChange={handleInputChange}
-          isLoading={isLoading}
+          isLoading={isLoading || showTyping}
+          disabled={isLoading || showTyping}
         />
       </form>
     </div>
