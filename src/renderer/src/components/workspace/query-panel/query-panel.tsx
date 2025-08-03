@@ -29,7 +29,7 @@ export default function QueryPanel(): React.JSX.Element {
         'group flex items-center gap-2 py-[16.5px] cursor-pointer border-b-3 -mb-px',
         activeTab === tabName
           ? 'border-primary-light text-genie-100'
-          : 'border-transparent text-genie-500 hover:text-system-white'
+          : 'border-transparent text-genie-500 hover:text-genie-200 hover:opacity-80'
       )}
     >
       <Icon className="size-4 stroke-current" />
