@@ -123,7 +123,7 @@ export default function ChatMessage({
       )}
       {sql && (
         <div className="self-stretch p-4 bg-zinc-900 rounded-lg flex flex-col justify-start items-end gap-4">
-          <div className="self-stretch justify-start text-neutral-200 text-sm font-normal font-['JetBrains_Mono'] leading-tight">
+          <div className="self-stretch justify-start text-neutral-200 font-code leading-tight">
             <HighlightedText text={sql} highlight={highlightTerm} />
           </div>
           <div className="inline-flex justify-start items-start gap-2.5">
