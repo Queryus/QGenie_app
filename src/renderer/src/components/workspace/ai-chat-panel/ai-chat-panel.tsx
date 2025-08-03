@@ -2,8 +2,9 @@ import { useState, useRef } from 'react'
 import ChatHeader from './chat-header'
 import ChatInput from './chat-input'
 import ChatMessage from './chat-message'
-import { useChat } from '@ai-sdk/react'
+import { useChat, Message } from '@ai-sdk/react'
 import { Sparkles } from 'lucide-react'
+import TypingLoadingAnimation from './typing-loading-animation'
 
 const initialSuggestions = [
   '가장 많이 팔린 상품 5개 보여줘',
@@ -18,7 +19,7 @@ const initialSuggestions = [
  */
 export default function AiChatPanel(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const { messages, input, handleInputChange, handleSubmit, setInput, isLoading } = useChat({
+  const { messages, input, handleInputChange, setInput, isLoading, append } = useChat({
     api: '/api/chat',
     streamProtocol: 'text', // TODO: AI 팀에서 받아올 때는 data로 변경해야함
     initialMessages: [
@@ -32,9 +33,37 @@ export default function AiChatPanel(): React.JSX.Element {
   })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const [tempMessages, setTempMessages] = useState<Message[]>([])
+  const [showTyping, setShowTyping] = useState(false)
+
   const handleSuggestionClick = (suggestion: string): void => {
     setInput(suggestion)
     textareaRef.current?.focus()
+  }
+
+  const handleSubmitCustom = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    if (!input.trim()) return
+
+    const userMessage: Message = {
+      id: `${Date.now()}`,
+      role: 'user',
+      content: input.trim()
+    }
+
+    setTempMessages((prev) => [...prev, userMessage])
+    setInput('')
+    setShowTyping(true)
+
+    // TODO: 추후 AI 응답의 실제 완료 시점을 기반으로 로딩 애니메이션을 종료하도록 수정 필요
+    setTimeout(() => {
+      append({
+        role: 'user',
+        content: userMessage.content
+      })
+      setTempMessages([])
+      setShowTyping(false)
+    }, 5000)
   }
 
   console.log(messages)
@@ -43,7 +72,7 @@ export default function AiChatPanel(): React.JSX.Element {
     <div className="flex-1 h-full bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex flex-col">
       <ChatHeader onSearchChange={setSearchTerm} />
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6">
-        {messages.map((m, index) => (
+        {[...messages, ...tempMessages].map((m, index) => (
           <div key={m.id}>
             <ChatMessage message={m} highlightTerm={searchTerm} />
             {m.role === 'system' && index === 0 && (
@@ -64,13 +93,15 @@ export default function AiChatPanel(): React.JSX.Element {
             )}
           </div>
         ))}
+        {showTyping && <TypingLoadingAnimation className="h-12" />}
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmitCustom}>
         <ChatInput
           ref={textareaRef}
           value={input}
           onChange={handleInputChange}
-          isLoading={isLoading}
+          isLoading={isLoading || showTyping}
+          disabled={isLoading || showTyping}
         />
       </form>
     </div>
