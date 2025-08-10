@@ -39,7 +39,7 @@ export function SelectDatabase({
   return (
     <div className="self-stretch flex flex-col justify-start items-start gap-6">
       <div className="self-stretch flex flex-col justify-start items-start gap-2">
-        <div className="self-stretch justify-start text-[#e3e3e3] text-sm font-bold font-['Pretendard'] leading-[21px]">
+        <div className="self-stretch justify-start text-genie-100 text-sm font-bold font-['Pretendard'] leading-[21px]">
           데이터베이스 종류
         </div>
         <div className="relative w-full">
@@ -48,8 +48,8 @@ export function SelectDatabase({
           </div>
           <Input
             className="w-full pl-9 pr-8 text-xs text-white font-medium font-['Pretendard'] leading-[18px]
-                      bg-[#1c1c1c] rounded-lg border border-[#383838] transition duration-150
-                      focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:border-[#9F73FF]"
+                      bg-genie-900 rounded-lg border border-genie-700 transition duration-150
+                      focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:border-primary-light"
             placeholder="예: MySQL, PostgreSQL"
             value={searchText}
             spellCheck={false}
@@ -68,8 +68,8 @@ export function SelectDatabase({
         <div
           className="
             w-full h-[290px] overflow-y-scroll
-            self-stretch p-4 bg-gradient-to-b from-[#1d1d1d] to-neutral-800 rounded-lg outline-1 
-            outline-offset-[-1px] outline-[#383838] grid 
+            self-stretch p-4 bg-gradient-genie-darkgray rounded-lg outline-1 
+            outline-offset-[-1px] outline-genie-700 grid 
             grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8
             gap-0.5 place-items-start"
         >
@@ -88,10 +88,10 @@ export function SelectDatabase({
       </div>
       <div className="self-stretch flex flex-col justify-start items-start gap-2">
         <div className="self-stretch flex flex-col justify-start items-start gap-1">
-          <div className="self-stretch justify-start text-[#e3e3e3] text-sm font-bold font-['Pretendard'] leading-[21px]">
+          <div className="self-stretch justify-start text-genie-100 text-sm font-bold font-['Pretendard'] leading-[21px]">
             데이터베이스 연결 이름
           </div>
-          <div className="self-stretch justify-start text-[#808080] text-xs font-medium font-['Pretendard'] leading-[18px]">
+          <div className="self-stretch justify-start text-genie-500 text-xs font-medium font-['Pretendard'] leading-[18px]">
             이 연결을 나중에 쉽게 찾을 수 있도록 이름을 정할 수 있어요.
           </div>
         </div>
@@ -99,8 +99,8 @@ export function SelectDatabase({
         <div className="relative w-full">
           <Input
             className="w-full pr-8 text-xs text-white font-medium font-['Pretendard'] leading-[18px]
-                bg-gradient-to-b from-[#1d1d1d] to-neutral-800 rounded-lg border border-[#383838] transition duration-150
-                focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:border-[#9F73FF]"
+                bg-gradient-genie-darkgray rounded-lg border border-genie-700 transition duration-150
+                focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:border-primary-light"
             placeholder="예: 인사 데이터, 고객 관리"
             value={connectionName}
             spellCheck={false}

@@ -183,6 +183,10 @@
   );
 }
 
+@utility bg-gradient-genie-darkgray {
+  background-image: linear-gradient(to bottom, var(--color-genie-900), var(--color-genie-800));
+}
+
 @utility bg-gradient-genie-primary {
   background-image: linear-gradient(
     to bottom,

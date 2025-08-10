@@ -54,17 +54,17 @@ export default function InstallDriver({
 
   return (
     <div className="self-stretch inline-flex flex-col justify-start items-start gap-2">
-      <div className="self-stretch justify-start text-[#e3e3e3] text-sm font-bold font-['Pretendard'] leading-[21px]">
+      <div className="self-stretch justify-start text-genie-100 text-sm font-bold font-['Pretendard'] leading-[21px]">
         드라이버 확인 및 설치
       </div>
-      <div className="self-stretch p-5 bg-gradient-to-b from-[#1d1d1d] to-neutral-800 rounded-lg  outline-1 outline-offset-[-1px] outline-[#383838] flex flex-col justify-start items-start gap-4">
+      <div className="self-stretch p-5 bg-gradient-genie-darkgray rounded-lg  outline-1 outline-offset-[-1px] outline-genie-700 flex flex-col justify-start items-start gap-4">
         <div className="self-stretch inline-flex justify-between items-start">
           <div className="size- inline-flex flex-col justify-start items-start gap-1">
-            <div className="text-start justify-start text-[#e3e3e3] text-base font-bold font-['Pretendard'] leading-normal">
+            <div className="text-start justify-start text-genie-100 text-base font-bold font-['Pretendard'] leading-normal">
               {selectedDatabase.label}
             </div>
             <div
-              className={`flex items-center gap-1 ${isDriverDownloaded ? 'text-[#9F73FF]' : 'text-[#E2378C]'}`}
+              className={`flex items-center gap-1 ${isDriverDownloaded ? 'text-primary-light' : 'text-error'}`}
             >
               {isDriverDownloaded ? (
                 <CheckCircle2 className={`size-4`} />
@@ -78,7 +78,7 @@ export default function InstallDriver({
           </div>
           <div className="flex justify-start items-center gap-2">
             <div
-              className={`text-[#e3e3e3] bg-gradient-to-b from-[#444444] to-[#333333] rounded-lg  outline-1 outline-offset-[-1px]
+              className={`text-genie-100 bg-gradient-to-b bg-gradient-genie-gray rounded-lg  outline-1 outline-offset-[-1px]
                  outline-white/20 flex justify-center items-center gap-2 ${isDriverDownloaded && 'cursor-not-allowed'}`}
             >
               <Button
@@ -97,26 +97,26 @@ export default function InstallDriver({
         </div>
         <div className="size- flex flex-col justify-start items-start gap-1">
           <div className="self-stretch inline-flex justify-start items-start gap-2">
-            <div className="text-center justify-start text-[#808080] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="text-center justify-start text-genie-500 text-xs font-medium font-['Pretendard'] leading-[18px]">
               버전
             </div>
-            <div className="text-center justify-start text-[#e3e3e3] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
               {version}
             </div>
           </div>
           <div className="self-stretch inline-flex justify-start items-start gap-2">
-            <div className="text-center justify-start text-[#808080] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="text-center justify-start text-genie-500 text-xs font-medium font-['Pretendard'] leading-[18px]">
               파일명
             </div>
-            <div className="text-center justify-start text-[#e3e3e3] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
               {driverName}
             </div>
           </div>
           <div className="self-stretch inline-flex justify-start items-start gap-2">
-            <div className="text-center justify-start text-[#808080] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="text-center justify-start text-genie-500 text-xs font-medium font-['Pretendard'] leading-[18px]">
               크기
             </div>
-            <div className="text-center justify-start text-[#e3e3e3] text-xs font-medium font-['Pretendard'] leading-[18px]">
+            <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
               {driverVolume}
             </div>
           </div>

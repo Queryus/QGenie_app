@@ -25,8 +25,8 @@ export default function KeyManagement(): React.JSX.Element {
             onChange={(e) => setApiKey(e.target.value)}
             spellCheck={false}
             className={`w-full pr-8 text-xs text-white font-medium font-['Pretendard'] leading-[18px]
-              bg-gradient-to-b from-[#1d1d1d] to-neutral-800 rounded-lg border border-[#383838] transition duration-150
-              focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:border-[#9F73FF]`}
+              bg-gradient-genie-darkgray rounded-lg border border-genie-700 transition duration-150
+              focus:outline-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 focus:border-primary-light`}
           />
           {apiKey && (
             <Button

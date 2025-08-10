@@ -128,11 +128,11 @@ export function ConnectionWizard(): JSX.Element {
 
   return (
     <div className={`flex w-full h-screen min-w-[800px] items-center justify-center`}>
-      <div className="flex-[7] h-full bg-[#1C1C1C]">
+      <div className="flex-[7] h-full bg-genie-900">
         <Sidebar activeTab={activeTab} />
       </div>
-      <div className="flex-[13] self-stretch h-full bg-[#1c1c1c] inline-flex justify-start items-center">
-        <div className="w-full h-full p-6 bg-[#272727] inline-flex flex-col justify-between items-start space-y-6">
+      <div className="flex-[13] self-stretch h-full bg-genie-900 inline-flex justify-start items-center">
+        <div className="w-full h-full p-6 bg-genie-800 inline-flex flex-col justify-between items-start space-y-6">
           {activeTab === DBSetupStep.SelectDatabase && (
             <SelectDatabase
               selectedDatabase={selectedDatabase}

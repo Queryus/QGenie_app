@@ -50,18 +50,18 @@ export default function ConfirmSettings({
 
   return (
     <div className="self-stretch pt-6 inline-flex flex-col justify-start items-center gap-6">
-      <div className="size-[100px] bg-[#383838] rounded-full" />
-      <div className="self-stretch text-center justify-start text-[#e3e3e3] text-base font-bold font-['Pretendard'] leading-normal">
+      <div className="size-[100px] bg-genie-700 rounded-full" />
+      <div className="self-stretch text-center justify-start text-genie-100 text-base font-bold font-['Pretendard'] leading-normal">
         연결 설정 완료!
       </div>
-      <div className="self-stretch p-5 bg-gradient-to-b from-[#1d1d1d] to-neutral-800 rounded-lg outline-1 outline-offset-[-1px] outline-[#383838] flex flex-col justify-start items-start gap-4">
+      <div className="self-stretch p-5 bg-gradient-genie-darkgray rounded-lg outline-1 outline-offset-[-1px] outline-genie-700 flex flex-col justify-start items-start gap-4">
         <div className="self-stretch flex flex-col justify-start items-start gap-2">
           {filteredEntries.map(([key, value]) => (
             <div key={key} className="self-stretch inline-flex justify-between items-start">
-              <div className="text-center justify-start text-[#808080] text-xs font-medium font-['Pretendard'] leading-[18px]">
+              <div className="text-center justify-start text-genie-500 text-xs font-medium font-['Pretendard'] leading-[18px]">
                 {labelMap[key] || key}
               </div>
-              <div className="text-center justify-start text-[#e3e3e3] text-xs font-medium font-['Pretendard'] leading-[18px]">
+              <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
                 {displayValue(key, value)}
               </div>
             </div>

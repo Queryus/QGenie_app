@@ -15,7 +15,7 @@ export default function SettingModal(): React.JSX.Element {
   return (
     <div className={`flex w-full h-screen min-w-[800px] items-center justify-center`}>
       <SettingSideBar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="p-6 w-full h-full flex-[2] bg-[#272727]">
+      <div className="p-6 w-full h-full flex-[2] bg-genie-800">
         <KeyManagement />
       </div>
     </div>

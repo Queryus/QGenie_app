@@ -22,15 +22,15 @@ const Sidebar = ({ activeTab }: SidebarProp): React.JSX.Element => {
         const baseClass = 'w-full p-2 rounded-lg inline-flex justify-start items-center gap-[13px]'
 
         const statusClass = {
-          done: 'bg-[#272727] text-[#808080]',
-          active: 'bg-[#272727] text-[#e3e3e3]',
-          upcoming: 'bg-transparent text-[#808080]'
+          done: 'bg-genie-800 text-genie-500',
+          active: 'bg-genie-800 text-genie-100',
+          upcoming: 'bg-transparent text-genie-500'
         }[status]
 
         const numberBg = {
-          done: 'from-[#444444] to-[#333333] outline-white/20',
-          active: 'from-[#444444] to-[#333333] outline-white/20',
-          upcoming: 'from-[#1d1d1d] to-neutral-800 outline-[#383838]'
+          done: 'bg-gradient-genie-gray outline-white/20',
+          active: 'bg-gradient-genie-gray outline-white/20',
+          upcoming: 'bg-gradient-genie-darkgray outline-genie-700'
         }[status]
 
         return (

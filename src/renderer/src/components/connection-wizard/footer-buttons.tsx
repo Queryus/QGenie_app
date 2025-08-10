@@ -51,20 +51,22 @@ export const FooterButtons = ({
 
   return (
     <div className="self-stretch inline-flex justify-end items-center gap-2">
-      <div className="bg-gradient-to-b from-[#444444] to-[#333333] rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2">
+      <div className="bg-gradient-genie-gray rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2">
         <Button
           onClick={leftHandler}
-          className="justify-start text-[#e3e3e3] text-xs font-semibold font-['Pretendard'] cursor-pointer"
+          variant={'secondary'}
+          className="justify-start text-genie-100 text-xs font-semibold font-['Pretendard'] cursor-pointer"
         >
           <ChevronLeft className="size-3 relative overflow-hidden text-white" />
           {leftText}
         </Button>
       </div>
 
-      <div className="bg-gradient-to-b from-[#4e18ff] to-[#4300d6] rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2">
+      <div className="bg-gradient-genie-primary rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2">
         <Button
           onClick={rightHandler}
-          className="justify-start text-[#e3e3e3] text-xs font-semibold font-['Pretendard'] cursor-pointer"
+          variant={'secondary'}
+          className="justify-start text-genie-100 text-xs font-semibold font-['Pretendard'] cursor-pointer"
         >
           {rightText}
           <ChevronRight className="size-3 relative overflow-hidden text-white" />
