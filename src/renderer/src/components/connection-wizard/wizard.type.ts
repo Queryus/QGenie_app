@@ -32,18 +32,24 @@ export interface DatabaseInfo {
   key: Database
   label: string
   icon: string
+  id: string
 }
 
 export const DATABASES: DatabaseInfo[] = [
-  { key: Database.MySQL, label: 'MySQL', icon: '/mysql.png' },
-  { key: Database.MariaDB, label: 'MariaDB', icon: '/mariadb.png' },
-  { key: Database.PostgreSQL, label: 'PostgreSQL', icon: '/postgresql.png' },
-  { key: Database.SQLite, label: 'SQLite', icon: '/sqlite.png' },
-  { key: Database.MicrosoftSQLServer, label: 'Microsoft SQL Server', icon: '/microsoft.png' },
-  { key: Database.Oracle, label: 'Oracle', icon: '/oracle.png' }
+  { key: Database.MySQL, label: 'MySQL', icon: '/mysql.png', id: 'mysql' },
+  { key: Database.MariaDB, label: 'MariaDB', icon: '/mariadb.png', id: 'mariadb' },
+  { key: Database.PostgreSQL, label: 'PostgreSQL', icon: '/postgresql.png', id: 'postgresql' },
+  { key: Database.SQLite, label: 'SQLite', icon: '/sqlite.png', id: 'sqlite' },
+  {
+    key: Database.MicrosoftSQLServer,
+    label: 'Microsoft SQL Server',
+    icon: '/microsoft.png',
+    id: 'sqlserver'
+  },
+  { key: Database.Oracle, label: 'Oracle', icon: '/oracle.png', id: 'oracle' }
 ]
 
-export interface ConnectionDeatil {
+export interface ConnectionDetail {
   nickname: string | null
   databaseName: string | null
   username: string | null

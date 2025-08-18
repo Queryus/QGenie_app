@@ -1,12 +1,22 @@
 import { AlertCircle, CheckCircle2, FolderOpen } from 'lucide-react'
 import { DatabaseInfo } from './wizard.type'
 import { Button } from '../ui/button'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { api } from '@renderer/utils/api'
+import { toast } from 'sonner'
 
 interface InstallDriverProp {
   selectedDatabase: DatabaseInfo
   isDriverDownloaded: boolean
   setIsDriverDownloaded: (isDriverDownloaded: boolean) => void
+}
+
+interface DBData {
+  db_type: string
+  is_installed: boolean
+  driver_name: string
+  driver_version: string
+  driver_size_bytes: number
 }
 
 /**
@@ -21,36 +31,31 @@ export default function InstallDriver({
   isDriverDownloaded,
   setIsDriverDownloaded
 }: InstallDriverProp): React.JSX.Element {
-  const [version, setVersion] = useState('알 수 없음')
-  const [driverName, setDriverName] = useState('알 수 없음')
-  const [driverVolume, setDriverVolume] = useState('알 수 없음')
-  const [downloadUrl, setDownloadUrl] = useState('')
+  const didFetch = useRef(false)
+  const [dbData, setDBdata] = useState<DBData>()
 
   useEffect(() => {
-    if (!isDriverDownloaded)
-      setTimeout(() => {
-        handleCheckIsDownloaded()
-      }, 1000)
+    if (didFetch.current) return
+    didFetch.current = true
+    api
+      .get(`/api/driver/info/${selectedDatabase?.id}`)
+      .then((driverData) => {
+        setDBdata(driverData.data as DBData)
+        setIsDriverDownloaded(true)
+        toast.success('데이터베이스 드라이버 확인 완료 🎉')
+      })
+      .catch(() => {
+        setIsDriverDownloaded(false)
+        toast.error('데이터베이스 드라이버 확인 중 오류가 발생했습니다.')
+      })
   })
 
-  const handleCheckIsDownloaded = (): void => {
-    /**
-     * FIXME: API 호출
-     *
-     * 서버에서 드라이버 여부, 버전 가져와서 랜더링
-     */
-    setDriverName(selectedDatabase.key + ' driver')
-    setVersion('0.0.0')
-    setDriverVolume('2MB')
-    setIsDriverDownloaded(true)
-    setDownloadUrl('https://www.google.com')
-  }
+  // NOTE: 수동 다운로드 보류 (sqlserver)
+  // const handleManualDownload = (): void => {
+  //   if (!downloadUrl) throw Error('드라이버 다운로드 링크 없음')
 
-  const handleManualDownload = (): void => {
-    if (!downloadUrl) throw Error('드라이버 다운로드 링크 없음')
-
-    window.api.send('open-external', downloadUrl)
-  }
+  //   window.api.send('open-external', downloadUrl)
+  // }
 
   return (
     <div className="self-stretch inline-flex flex-col justify-start items-start gap-2">
@@ -81,12 +86,7 @@ export default function InstallDriver({
               className={`text-genie-100 bg-gradient-to-b bg-gradient-genie-gray rounded-lg  outline-1 outline-offset-[-1px]
                  outline-white/20 flex justify-center items-center gap-2 ${isDriverDownloaded && 'cursor-not-allowed'}`}
             >
-              <Button
-                size={'sm'}
-                className="m-0 p-0"
-                onClick={handleManualDownload}
-                disabled={isDriverDownloaded}
-              >
+              <Button size={'sm'} className="m-0 p-0" disabled={isDriverDownloaded}>
                 <FolderOpen className="size-3 relative overflow-hidden" />
                 <div className="justify-start text-xs font-semibold font-['Pretendard'] leading-[18px]">
                   수동 설치
@@ -101,7 +101,7 @@ export default function InstallDriver({
               버전
             </div>
             <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
-              {version}
+              {dbData?.driver_version}
             </div>
           </div>
           <div className="self-stretch inline-flex justify-start items-start gap-2">
@@ -109,7 +109,7 @@ export default function InstallDriver({
               파일명
             </div>
             <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
-              {driverName}
+              {dbData?.driver_name}
             </div>
           </div>
           <div className="self-stretch inline-flex justify-start items-start gap-2">
@@ -117,7 +117,7 @@ export default function InstallDriver({
               크기
             </div>
             <div className="text-center justify-start text-genie-100 text-xs font-medium font-['Pretendard'] leading-[18px]">
-              {driverVolume}
+              {dbData?.driver_size_bytes}
             </div>
           </div>
         </div>

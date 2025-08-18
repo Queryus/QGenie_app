@@ -1,22 +1,22 @@
 import { X } from 'lucide-react'
-import { ConnectionDeatil } from './wizard.type'
+import { ConnectionDetail } from './wizard.type'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { cn } from '@/lib/utils'
 
 interface EnterConnectionDetailsProp {
-  connectionDetail: ConnectionDeatil
-  setConnectionDetail: (connectionDetail: ConnectionDeatil) => void
+  connectionDetail: ConnectionDetail
+  setConnectionDetail: React.Dispatch<React.SetStateAction<ConnectionDetail>>
   errorFields?: { [key: string]: boolean }
   setErrorFields?: (fields: { [key: string]: boolean }) => void
 }
 
 interface InputFieldProps {
   label: string
-  field: keyof ConnectionDeatil
+  field: keyof ConnectionDetail
   placeholder?: string
-  connectionDetail: ConnectionDeatil
-  setConnectionDetail: (detail: ConnectionDeatil) => void
+  connectionDetail: ConnectionDetail
+  setConnectionDetail: (detail: ConnectionDetail) => void
   isNumber?: boolean
   hasError?: boolean
   onClearError?: () => void
