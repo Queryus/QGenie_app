@@ -29,7 +29,7 @@ export default function KeyManagement(): React.JSX.Element {
     didFetch.current = true
 
     api
-      .get('/api/keys/result')
+      .get('/api/keys/find')
       .then((response) => {
         const data = response.data
         setApiKey(data[0])
@@ -47,7 +47,7 @@ export default function KeyManagement(): React.JSX.Element {
     // update
     if (apiKey.created_at) {
       api
-        .put('/api/keys/result', {
+        .put(`/api/keys/modify/${apiKey.service_name}`, {
           api_key: apiKey.id
         })
         .then(() => {
