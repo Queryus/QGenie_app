@@ -151,17 +151,32 @@ export function ConnectionWizard(): JSX.Element {
     api
       .post('/api/user/db/create/profile', filteredPayload)
       .then((response) => {
-        const id = response.data.id as number
+        const id = response.data.id as string
         setConnectionDetail((prev) => ({
           ...prev,
           id: id
         }))
+        createAnnotation(id)
       })
       .catch(() => {
         toast.error('데이터베이스 연결 생성 중 오류가 발생했습니다.')
       })
+      .finally(() => {
+        // NOTE: 페이지 새로고침 -> 저장된거 불러오도록
+        window.location.reload()
+        onClose()
+      })
+  }
 
-    onClose()
+  const createAnnotation = (db_profile_id: string): void => {
+    api
+      .post('/api/annotations/create', {
+        db_profile_id: db_profile_id
+      })
+      .then(() => {})
+      .catch(() => {
+        toast.error('어노테이션 생성 중 오류가 발생했습니다.')
+      })
   }
 
   return (

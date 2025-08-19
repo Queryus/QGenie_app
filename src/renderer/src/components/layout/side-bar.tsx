@@ -3,7 +3,7 @@ import AppIcon from '@renderer/assets/icon.svg'
 import { Database, Plus, Settings, Tag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { NavItem } from '../workspace/types'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const bottomNavItems: NavItem[] = [
   {
@@ -59,21 +59,24 @@ function NavButton({ item }: { item: NavItem }): React.JSX.Element {
 
 export function Sidebar(): React.JSX.Element {
   const navigate = useNavigate()
+  const location = useLocation()
 
   const topNavItems: NavItem[] = [
     {
       id: 'database',
       icon: Database,
-      active: true,
+      active: location.pathname === '/',
       onClick: (): void | Promise<void> => navigate('/')
     },
     {
       id: 'tags',
       icon: Tag,
+      active: location.pathname === '/erd',
       disabled: false,
       onClick: (): void | Promise<void> => navigate('/erd')
     } // TODO: DB 연결 후에 disabled: false
   ]
+
   return (
     <aside className="h-full flex flex-col bg-zinc-900 p-4 items-center gap-6">
       <img src={AppIcon} className="size-6" alt="QGenie" />
