@@ -32,7 +32,11 @@ export default function KeyManagement(): React.JSX.Element {
       .get('/api/keys/find')
       .then((response) => {
         const data = response.data
-        setApiKey(data[0])
+        if (data && data.length > 0) {
+          setApiKey(data[0])
+        } else {
+          setIsEditable(true)
+        }
       })
       .catch(() => {
         toast.error('API 키 불러오기 중 오류가 발생했습니다.')
