@@ -29,10 +29,14 @@ export default function KeyManagement(): React.JSX.Element {
     didFetch.current = true
 
     api
-      .get('/api/keys/result')
+      .get('/api/keys/find')
       .then((response) => {
         const data = response.data
-        setApiKey(data[0])
+        if (data && data.length > 0) {
+          setApiKey(data[0])
+        } else {
+          setIsEditable(true)
+        }
       })
       .catch(() => {
         toast.error('API 키 불러오기 중 오류가 발생했습니다.')
@@ -47,7 +51,7 @@ export default function KeyManagement(): React.JSX.Element {
     // update
     if (apiKey.created_at) {
       api
-        .put('/api/keys/result', {
+        .put(`/api/keys/modify/${apiKey.service_name}`, {
           api_key: apiKey.id
         })
         .then(() => {
