@@ -1,43 +1,93 @@
-/**
- * @author nahyeongjin1
- * @summary 쿼리 실행 결과 패널
- * @returns JSX.Element
- */
-export default function QueryResults(): React.JSX.Element {
+export interface QueryResultData {
+  columns: string[]
+  rows: (string | number | null)[][]
+}
+
+interface QueryResultsProps {
+  result: QueryResultData | null
+  isLoading: boolean
+  error: string | null
+}
+
+export default function QueryResults({
+  result,
+  isLoading,
+  error
+}: QueryResultsProps): React.JSX.Element {
+  const hasResults = result && result.columns.length > 0
+
+  const renderContent = (): React.ReactNode => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-full text-neutral-400">
+          쿼리를 실행 중입니다...
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <div className="flex items-center justify-center h-full text-red-500">오류: {error}</div>
+      )
+    }
+
+    if (hasResults) {
+      return (
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-neutral-700">
+              <tr>
+                {result.columns.map((column) => (
+                  <th
+                    key={column}
+                    scope="col"
+                    className="px-4 py-2 text-left text-xs font-medium text-neutral-200 tracking-wider"
+                  >
+                    {column}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {result.rows.length > 0 ? (
+                result.rows.map((row, rowIndex) => (
+                  <tr key={rowIndex} className="border-b border-neutral-700">
+                    {row.map((cell, cellIndex) => (
+                      <td
+                        key={cellIndex}
+                        className="px-4 py-2 whitespace-nowrap text-sm text-neutral-200"
+                      >
+                        {String(cell)}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={result.columns.length}
+                    className="text-center py-4 text-sm text-neutral-400"
+                  >
+                    쿼리는 성공했지만 반환된 행이 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex items-center justify-center h-full text-neutral-500">
+        쿼리를 실행하여 결과를 확인하세요.
+      </div>
+    )
+  }
+
   return (
     <div className="flex-1 flex flex-col h-full">
-      <div className="flex-1 p-5 overflow-auto">
-        <div className="self-stretch rounded-lg outline-1 outline-offset-[-1px] outline-neutral-700 flex flex-col justify-start items-start overflow-hidden">
-          <div className="self-stretch bg-neutral-700 inline-flex justify-start items-center">
-            <div className="flex-1 p-2 justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-              상품명
-            </div>
-            <div className="flex-1 p-2 justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-              판매량
-            </div>
-            <div className="flex-1 p-2 justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-              매출액
-            </div>
-          </div>
-          {/* Table Rows */}
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="self-stretch border-b border-neutral-700 last:border-b-0 inline-flex justify-start items-center"
-            >
-              <div className="flex-1 p-2 justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-                item
-              </div>
-              <div className="flex-1 p-2 justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-                1000
-              </div>
-              <div className="flex-1 p-2 justify-start text-neutral-200 text-xs font-medium font-['Pretendard'] leading-none">
-                300,000
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <div className="flex-1 p-5 overflow-auto">{renderContent()}</div>
     </div>
   )
 }
