@@ -2,12 +2,13 @@ import { JSX, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { FooterButtons } from './footer-buttons'
 import { SelectDatabase } from './select-database'
-import { ConnectionDeatil, DatabaseInfo, DBSetupStep } from './wizard.type'
+import { ConnectionDetail, DatabaseInfo, DBSetupStep } from './wizard.type'
 import Sidebar from './sidebar'
 import InstallDriver from './install-driver'
 import EnterConnectionDetails from './enter-connection-details'
 import TestConnection from './test-connection'
 import ConfirmSettings from './confirm-settings'
+import { api } from '@renderer/utils/api'
 
 export function ConnectionWizard(): JSX.Element {
   // 현재 탭
@@ -21,7 +22,7 @@ export function ConnectionWizard(): JSX.Element {
   const [errorFields, setErrorFields] = useState<{ [key: string]: boolean }>({})
 
   // DB 연결 정보
-  const [connectionDetail, setConnectionDetail] = useState<ConnectionDeatil>({
+  const [connectionDetail, setConnectionDetail] = useState<ConnectionDetail>({
     nickname: null,
     databaseName: '',
     username: null,
@@ -79,19 +80,30 @@ export function ConnectionWizard(): JSX.Element {
       activeTab === DBSetupStep.EnterConnectionDetails &&
       nextStep === DBSetupStep.TestConnection
     ) {
-      /**
-       * TODO: 에러 필드 테두리 색깔 바꾸기
-       */
       const errors: { [key: string]: boolean } = {}
-      if (!connectionDetail.databaseName) {
-        errors.databaseName = true
+
+      // DBMS별 필수 필드
+      const requiredFieldsMap: Record<string, (keyof ConnectionDetail)[]> = {
+        sqlite: ['databaseName'],
+        mysql: ['host', 'port', 'username', 'password'],
+        mariadb: ['host', 'port', 'username', 'password'],
+        postgresql: ['host', 'port', 'username', 'password'],
+        oracle: ['host', 'port', 'username', 'password', 'databaseName']
       }
-      if (!connectionDetail.host) {
-        errors.host = true
-      }
-      if (!connectionDetail.port) {
-        errors.port = true
-      }
+
+      const requiredFields = selectedDatabase ? requiredFieldsMap[selectedDatabase.id] || [] : []
+
+      // 필수 값 체크
+      requiredFields.forEach((field) => {
+        const value = connectionDetail[field]
+        if (
+          value === null ||
+          value === undefined ||
+          (typeof value === 'string' && value.trim() === '')
+        ) {
+          errors[field] = true
+        }
+      })
 
       if (Object.keys(errors).length > 0) {
         setErrorFields(errors)
@@ -99,6 +111,7 @@ export function ConnectionWizard(): JSX.Element {
         return
       }
 
+      // 모든 필드가 채워졌으면 에러 초기화
       setErrorFields({})
     }
 
@@ -120,10 +133,35 @@ export function ConnectionWizard(): JSX.Element {
   }
 
   // 마지막 페이지에서 완료를 눌렀을 때
-  const onSave = (): void => {
-    /**
-     * TODO: connectionDetail 서버에 저장
-     */
+  const onSave = async (): Promise<void> => {
+    if (Object.keys(errorFields).length !== 0) return
+
+    const payload = {
+      type: selectedDatabase!.id,
+      host: connectionDetail.host,
+      port: connectionDetail.port,
+      username: connectionDetail.username,
+      password: connectionDetail.password,
+      name: connectionDetail.databaseName,
+      view_name: connectionDetail.nickname
+    }
+
+    const filteredPayload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v != null))
+
+    api
+      .post('/api/user/db/create/profile', filteredPayload)
+      .then((response) => {
+        const id = response.data.id as number
+        setConnectionDetail((prev) => ({
+          ...prev,
+          id: id
+        }))
+      })
+      .catch(() => {
+        toast.error('데이터베이스 연결 생성 중 오류가 발생했습니다.')
+      })
+
+    onClose()
   }
 
   return (
@@ -158,7 +196,13 @@ export function ConnectionWizard(): JSX.Element {
               setErrorFields={setErrorFields}
             />
           )}
-          {activeTab === DBSetupStep.TestConnection && <TestConnection setIsTested={setIsTested} />}
+          {activeTab === DBSetupStep.TestConnection && (
+            <TestConnection
+              selectedDatabase={selectedDatabase!}
+              connectionDetail={connectionDetail}
+              setIsTested={setIsTested}
+            />
+          )}
           {activeTab === DBSetupStep.ConfirmSettings && (
             <ConfirmSettings connectionDetail={connectionDetail} />
           )}

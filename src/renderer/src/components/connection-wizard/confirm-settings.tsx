@@ -1,7 +1,7 @@
-import { DATABASES, ConnectionDeatil } from './wizard.type'
+import { DATABASES, ConnectionDetail } from './wizard.type'
 
 interface ConfirmSettingsProp {
-  connectionDetail: ConnectionDeatil
+  connectionDetail: ConnectionDetail
 }
 
 type ConnectionValue = string | number | null
@@ -17,9 +17,9 @@ type ConnectionValue = string | number | null
 export default function ConfirmSettings({
   connectionDetail
 }: ConfirmSettingsProp): React.JSX.Element {
-  const entries = Object.entries(connectionDetail) as [keyof ConnectionDeatil, ConnectionValue][]
+  const entries = Object.entries(connectionDetail) as [keyof ConnectionDetail, ConnectionValue][]
 
-  const labelMap: Record<keyof ConnectionDeatil, string> = {
+  const labelMap: Record<keyof ConnectionDetail, string> = {
     nickname: '데이터베이스 연결 이름',
     databaseName: '데이터베이스명',
     username: '사용자명',
@@ -29,7 +29,7 @@ export default function ConfirmSettings({
     databaseType: '데이터베이스'
   }
 
-  const displayValue = (key: keyof ConnectionDeatil, value: ConnectionValue): string => {
+  const displayValue = (key: keyof ConnectionDetail, value: ConnectionValue): string => {
     if (key === 'databaseType') {
       if (!value) return ''
       const db = DATABASES.find((d) => d.key === value)

@@ -1,26 +1,43 @@
-import { CircleCheck } from 'lucide-react'
 import { Button } from '../ui/button'
 import { toast } from 'sonner'
+import { ConnectionDetail, DatabaseInfo } from './wizard.type'
+import { api } from '@renderer/utils/api'
 
 interface TestConnectionProp {
+  selectedDatabase: DatabaseInfo
+  connectionDetail: ConnectionDetail
   setIsTested: (isTested: boolean) => void
 }
-export default function TestConnection({ setIsTested }: TestConnectionProp): React.JSX.Element {
-  const handleTest = (): void => {
-    /**
-     * FIXME:
-     *
-     * 1. 테스트 API 호출
-     * 2. API 응답 결과 따라 분기
-     */
-    const flag = true
-    if (flag) {
-      toast.success('연결 테스트 성공')
-      setIsTested(true)
-    } else {
-      toast.error('연결 테스트 실패')
-      setIsTested(false)
+
+export default function TestConnection({
+  selectedDatabase,
+  connectionDetail,
+  setIsTested
+}: TestConnectionProp): React.JSX.Element {
+  const handleTest = async (): Promise<void> => {
+    const payload = {
+      type: selectedDatabase.id,
+      host: connectionDetail.host,
+      port: connectionDetail.port,
+      username: connectionDetail.username,
+      password: connectionDetail.password,
+      name: connectionDetail.databaseName
     }
+
+    const filteredPayload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v != null))
+
+    api
+      .post('/api/user/db/connect/test', filteredPayload)
+      .then((response) => {
+        const flag = response.data as boolean
+        setIsTested(flag)
+      })
+      .catch(() => {
+        toast.error('데이터베이스 연결 테스트 중 오류가 발생했습니다.')
+
+        // FIXME: 테스트시에 true
+        setIsTested(false)
+      })
   }
 
   return (
@@ -44,27 +61,6 @@ export default function TestConnection({ setIsTested }: TestConnectionProp): Rea
                 연결 테스트 시작하기
               </div>
             </Button>
-          </div>
-        </div>
-      </div>
-      <div className="self-stretch w-full inline-flex flex-col justify-start items-start gap-6">
-        <div className="self-stretch p-5 bg-gradient-genie-darkgray rounded-lg outline-1 outline-offset-[-1px] outline-genie-700 flex flex-col justify-start items-start gap-4">
-          <div className="inline-flex justify-center items-center gap-2 text-genie-100">
-            <CircleCheck className="w-4 h-4 relative overflow-hidden" />
-            <div className="text-center justify-start text-genie-100 text-base font-bold font-['Pretendard'] leading-normal">
-              테스트 항목
-            </div>
-          </div>
-          <div className="justify-start text-genie-500 text-xs font-medium font-['Pretendard'] leading-[18px]">
-            드라이버 로드 확인
-            <br />
-            호스트 및 포트 접근성 확인
-            <br />
-            인증 정보 검증
-            <br />
-            데이터베이스 접근 권한 확인
-            <br />
-            기본 쿼리 실행 테스트
           </div>
         </div>
       </div>
