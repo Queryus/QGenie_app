@@ -35,7 +35,7 @@ export default function ChatHistoryPanel(): React.JSX.Element {
         ))}
       </div>
       <div className="w-full flex justify-end">
-        <button className="w-21 flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg bg-gradient-genie-primary">
+        <button className="w-21 flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg bg-gradient-genie-primary hover:cursor-pointer">
           <Plus className="size-4 stroke-genie-100" />
           <p className="text-button font-pretendard text-genie-100">새 채팅</p>
         </button>
