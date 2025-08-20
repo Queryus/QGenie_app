@@ -17,7 +17,7 @@ const mockChatHistory: ChatSession[] = [
 export default function ChatHistoryPanel(): React.JSX.Element {
   return (
     <div className="absolute top-full right-0 mt-7 w-80 bg-gradient-genie-darkgray border border-border-secondary rounded-lg shadow-lg z-10 p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2.5 pb-2">
+      <div className="flex items-center gap-2.5 pl-2">
         <History className="size-4 stroke-[#E4E4E4]" />
         <h2 className="text-genie-100 text-title font-pretendard">채팅 내역</h2>
       </div>
