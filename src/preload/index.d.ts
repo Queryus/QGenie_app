@@ -1,7 +1,7 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 import { IpcRendererEvent } from 'electron'
 
-interface CustomAPI {
+export interface CustomAPI {
   versions: NodeJS.ProcessVersions
   send: <T = unknown>(channel: string, data?: T) => void
   closeCurrentWindow: () => void
@@ -9,7 +9,7 @@ interface CustomAPI {
   on: (
     channel: string,
     listener: (event: IpcRendererEvent, ...args: unknown[]) => void
-  ) => (() => void) | undefined
+  ) => () => void
 }
 
 declare global {

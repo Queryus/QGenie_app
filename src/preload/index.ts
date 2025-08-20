@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { CustomAPI } from './index.d'
 
 // Custom APIs for renderer
-const api = {
+const api: CustomAPI = {
   versions: process.versions,
   send: <T = unknown>(channel: string, data?: T) => {
     const validChannels = ['open-sub-window', 'ping', 'open-external']
@@ -12,12 +13,13 @@ const api = {
   },
   closeCurrentWindow: () => ipcRenderer.send('close-current-window'),
   // For useChat hook
-  invoke: (channel: string, ...args: unknown[]) => {
+  invoke: <T>(channel: string, ...args: unknown[]): Promise<T> => {
     const validChannels = ['chat:completion']
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, ...args)
     }
-    return Promise.resolve(undefined) // Add a return path for invalid channels
+    // Return a resolved promise with a value that matches the generic type T
+    return Promise.resolve(undefined as T)
   },
   on: (channel: string, listener: (event: IpcRendererEvent, ...args: unknown[]) => void) => {
     const validChannels = ['chat:completion-stream-chunk', 'chat:completion-stream-end']
