@@ -5,6 +5,7 @@ import ChatHistoryPanel from './chat-history-panel'
 
 interface ChatHeaderProps {
   onSearchChange: (term: string) => void
+  onSelectChat: (tabId: string) => void
 }
 
 /**
@@ -13,11 +14,19 @@ interface ChatHeaderProps {
  * @param onSearchChange 검색어가 변경될 때 호출되는 콜백 함수
  * @returns JSX.Element
  */
-export default function ChatHeader({ onSearchChange }: ChatHeaderProps): React.JSX.Element {
+export default function ChatHeader({
+  onSearchChange,
+  onSelectChat
+}: ChatHeaderProps): React.JSX.Element {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
   const toggleHistory = (): void => {
     setIsHistoryOpen((prev) => !prev)
+  }
+
+  const handleSelectChat = (tabId: string): void => {
+    onSelectChat(tabId)
+    setIsHistoryOpen(false) // 채팅 선택 후 패널 닫기
   }
 
   return (
@@ -34,7 +43,7 @@ export default function ChatHeader({ onSearchChange }: ChatHeaderProps): React.J
           <button onClick={toggleHistory} className="focus:outline-none">
             <History className="size-4 stroke-[#E4E4E4] cursor-pointer" />
           </button>
-          {isHistoryOpen && <ChatHistoryPanel />}
+          {isHistoryOpen && <ChatHistoryPanel onSelectChat={handleSelectChat} />}
         </div>
       </div>
     </div>
