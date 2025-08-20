@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react'
 
-export type SchemaNodeType = 'database' | 'schema' | 'folder' | 'table'
+export type SchemaNodeType = 'database' | 'schema' | 'table' | 'column'
 
 export interface SchemaNode {
   id: string
@@ -19,6 +19,6 @@ export interface SchemaTreeItemProps {
 export interface SchemaIconMap {
   database: LucideIcon
   schema: LucideIcon
-  folder: LucideIcon
   table: LucideIcon
+  column: LucideIcon
 }
