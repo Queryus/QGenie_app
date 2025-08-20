@@ -78,7 +78,8 @@ export default function ChatHistoryPanel({
   }
 
   const formatRelativeTime = (dateString: string): string => {
-    const date = new Date(dateString)
+    // 서버에서 Z 없이 오는 시간을 UTC로 간주하도록 강제
+    const date = new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`)
     return formatDistanceToNow(date, { addSuffix: true, locale: ko })
   }
 

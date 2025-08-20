@@ -104,7 +104,7 @@ export default function AiChatPanel(): React.JSX.Element {
     if (currentActiveTab && currentActiveTab.name !== activeTabName) {
       setActiveTabName(currentActiveTab.name)
     }
-  }, [chatTabs, activeTabId])
+  }, [chatTabs, activeTabId, activeTabName])
 
   const handleSelectChat = async (tab: ChatTab): Promise<void> => {
     setActiveTabId(tab.id)
