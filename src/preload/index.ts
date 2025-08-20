@@ -1,8 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { CustomAPI } from './index.d'
 
 // Custom APIs for renderer
-const api = {
+const api: CustomAPI = {
   versions: process.versions,
   send: <T = unknown>(channel: string, data?: T) => {
     const validChannels = ['open-sub-window', 'ping', 'open-external']
@@ -10,7 +11,28 @@ const api = {
       ipcRenderer.send(channel, data)
     }
   },
-  closeCurrentWindow: () => ipcRenderer.send('close-current-window')
+  closeCurrentWindow: () => ipcRenderer.send('close-current-window'),
+  // For useChat hook
+  invoke: <T>(channel: string, ...args: unknown[]): Promise<T> => {
+    const validChannels = ['chat:completion']
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, ...args)
+    }
+    // Return a resolved promise with a value that matches the generic type T
+    return Promise.resolve(undefined as T)
+  },
+  on: (channel: string, listener: (event: IpcRendererEvent, ...args: unknown[]) => void) => {
+    const validChannels = ['chat:completion-stream-chunk', 'chat:completion-stream-end']
+    if (validChannels.includes(channel)) {
+      ipcRenderer.on(channel, listener)
+      // Return a cleanup function
+      return () => {
+        ipcRenderer.removeListener(channel, listener)
+      }
+    }
+    // Add a return path for invalid channels
+    return () => {}
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

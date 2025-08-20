@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, shell } from 'electron'
 import { createSubWindow } from '../windows/subWindow'
+import axios from 'axios'
 
 /**
  * NOTE: IPC Handler 한 번에 등록, 관리
@@ -31,5 +32,51 @@ export function registerIpcHandlers(mainWindow?: BrowserWindow): void {
   ipcMain.on('close-current-window', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     win?.close()
+  })
+
+  // Vercel AI SDK 'useChat' 훅을 위한 핸들러 (스트리밍 시뮬레이션)
+  ipcMain.handle('chat:completion', async (event, { messages, chatTabId }) => {
+    if (!chatTabId) {
+      return { error: 'chatTabId is required' }
+    }
+
+    const userMessage = messages.at(-1)?.content
+    if (!userMessage) {
+      return { error: 'No user message found' }
+    }
+
+    try {
+      const requestBody = {
+        chat_tab_id: chatTabId,
+        message: userMessage
+      }
+      console.log('Sending request to backend:', JSON.stringify(requestBody, null, 2))
+
+      // 1. 백엔드로부터 완전한 응답을 받습니다.
+      const response = await axios.post(
+        'http://localhost:39722/api/chatMessages/create',
+        requestBody
+      )
+
+      if (response.data && response.data.data) {
+        const aiMessage = response.data.data.message as string
+
+        // 2. 받은 메시지를 한 글자씩 쪼개서 짧은 딜레이와 함께 전송합니다.
+        for (const char of aiMessage) {
+          event.sender.send('chat:completion-stream-chunk', char)
+          await new Promise((resolve) => setTimeout(resolve, 30)) // 30ms 딜레이
+        }
+
+        // 3. 스트림 종료를 알립니다.
+        event.sender.send('chat:completion-stream-end')
+        return { success: true }
+      } else {
+        throw new Error('Invalid API response format')
+      }
+    } catch (error) {
+      console.error('AI 응답 요청 실패:', error)
+      event.sender.send('chat:completion-stream-end') // 실패 시에도 종료 이벤트 전송
+      return { error: 'Failed to get AI response' }
+    }
   })
 }

@@ -85,7 +85,7 @@ export default function ChatMessage({
   const isSystem = role === 'system'
   const isAi = role === 'assistant'
 
-  // 임시: content에서 SQL 부분만 추출 (실제로는 더 정교한 파싱 필요)
+  // : content에서 SQL 부분만 추출 (실제로는 더 정교한 파싱 필요)
   const sqlMatch = content.match(/```sql\n([\s\S]*?)\n```/)
   const mainContent = sqlMatch ? content.replace(sqlMatch[0], '').trim() : content
 
@@ -108,17 +108,18 @@ export default function ChatMessage({
         isUser ? 'items-end' : 'items-start'
       )}
     >
-      {(isAi || isUser) && mainContent && (
+      {(isAi || isUser) && (
         <div
           className={cn(
-            "w-fit max-w-md px-3 py-1.5 rounded-lg text-xs font-medium font-['Pretendard'] leading-none",
+            "w-fit max-w-md px-3 py-1.5 rounded-lg text-xs font-medium font-['Pretendard'] leading-none text-neutral-200",
             isUser
               ? 'bg-gradient-to-b from-neutral-700 to-zinc-800 outline-1 outline-offset-[-1px] outline-white/20'
-              : '',
-            isAi ? 'text-neutral-200' : 'text-neutral-200'
+              : 'bg-zinc-900', // AI 메시지 배경색 추가
+            // 내용과 SQL이 모두 없을 때만 최소 높이를 적용
+            !mainContent && !sql ? 'min-h-[20px]' : ''
           )}
         >
-          <HighlightedText text={mainContent} highlight={highlightTerm} />
+          {mainContent && <HighlightedText text={mainContent} highlight={highlightTerm} />}
         </div>
       )}
       {sql && (

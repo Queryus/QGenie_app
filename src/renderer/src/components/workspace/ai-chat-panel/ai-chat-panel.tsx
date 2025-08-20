@@ -1,10 +1,14 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import ChatHeader from './chat-header'
 import ChatInput from './chat-input'
 import ChatMessage from './chat-message'
-import { useChat, Message } from '@ai-sdk/react'
 import { Sparkles } from 'lucide-react'
 import TypingLoadingAnimation from './typing-loading-animation'
+import { getChatTabs, createChatTab, getChatTabMessages } from '../../../utils/chatApi'
+import { Message, useChat } from '@ai-sdk/react'
+import { ChatTab } from './ai-chat.types'
+import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 const initialSuggestions = [
   '가장 많이 팔린 상품 5개 보여줘',
@@ -12,67 +16,199 @@ const initialSuggestions = [
   '고객별 주문 횟수를 내림차순으로 정렬해줘'
 ]
 
-/**
- * @author nahyeongjin1
- * @summary AI 질의 화면
- * @returns JSX.Element
- */
+const systemMessage: Message = {
+  id: '1',
+  role: 'system',
+  content: '안녕하세요!\n자연어로 데이터베이스에 질문하시면 SQL 쿼리를 자동으로 생성해드립니다.'
+}
+
 export default function AiChatPanel(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
-  const { messages, input, handleInputChange, setInput, isLoading, append } = useChat({
-    api: '/api/chat',
-    streamProtocol: 'text', // TODO: AI 팀에서 받아올 때는 data로 변경해야함
-    initialMessages: [
-      {
-        id: '1',
-        role: 'system',
-        content:
-          '안녕하세요!\n자연어로 데이터베이스에 질문하시면 SQL 쿼리를 자동으로 생성해드립니다.'
-      }
-    ]
-  })
+  const [activeTabId, setActiveTabId] = useState<string | null>(null)
+  const [activeTabName, setActiveTabName] = useState<string>('AI 채팅')
+  const [chatTabs, setChatTabs] = useState<ChatTab[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const initialized = useRef(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const [tempMessages, setTempMessages] = useState<Message[]>([])
-  const [showTyping, setShowTyping] = useState(false)
+  const { messages, input, handleInputChange, setMessages, setInput } = useChat({
+    initialMessages: [systemMessage]
+  })
+
+  useEffect(() => {
+    const handleStreamChunk = (_event, chunk: unknown): void => {
+      if (typeof chunk !== 'string') return
+      setMessages((prevMessages) => {
+        const lastMessage = prevMessages[prevMessages.length - 1]
+        if (lastMessage?.role === 'assistant') {
+          return [
+            ...prevMessages.slice(0, -1),
+            { ...lastMessage, content: lastMessage.content + chunk }
+          ]
+        }
+        return prevMessages
+      })
+    }
+
+    const handleStreamEnd = (): void => {
+      setIsLoading(false)
+    }
+
+    const cleanupChunk = window.api.on('chat:completion-stream-chunk', handleStreamChunk)
+    const cleanupEnd = window.api.on('chat:completion-stream-end', handleStreamEnd)
+
+    return () => {
+      cleanupChunk()
+      cleanupEnd()
+    }
+  }, [setMessages])
+
+  const fetchChatTabs = async (): Promise<void> => {
+    try {
+      const response = await getChatTabs()
+      if (response && response.data) {
+        const sortedTabs = response.data.sort(
+          (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        )
+        setChatTabs(sortedTabs)
+      } else {
+        setChatTabs([])
+      }
+    } catch (error) {
+      console.error('채팅 탭 목록을 불러오는 데 실패했습니다:', error)
+      toast.error('채팅 내역을 불러오는 데 실패했습니다.')
+    }
+  }
+
+  const handleSelectChat = useCallback(
+    async (tab: ChatTab): Promise<void> => {
+      setActiveTabId(tab.id)
+      setActiveTabName(tab.name)
+      try {
+        const response = await getChatTabMessages(tab.id)
+        if (response && response.data && response.data.messages) {
+          const fetchedMessages: Message[] = response.data.messages.map((msg) => ({
+            id: msg.id,
+            role: msg.sender === 'U' ? 'user' : 'assistant',
+            content: msg.message
+          }))
+          setMessages([systemMessage, ...fetchedMessages])
+        } else {
+          setMessages([systemMessage])
+        }
+      } catch (error) {
+        console.error('채팅 메시지를 불러오는 데 실패했습니다:', error)
+        setMessages([systemMessage])
+      }
+    },
+    [setMessages]
+  )
+
+  useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
+
+    const initializeChat = async (): Promise<void> => {
+      try {
+        const tabsResponse = await getChatTabs()
+        let targetTab: ChatTab | null = null
+        let isNewTab = false
+
+        if (tabsResponse && tabsResponse.data && tabsResponse.data.length > 0) {
+          const sortedTabs = tabsResponse.data.sort(
+            (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          )
+          setChatTabs(sortedTabs)
+          targetTab = sortedTabs[0]
+        } else {
+          const newTabResponse = await createChatTab('새로운 채팅')
+          if (newTabResponse && newTabResponse.data) {
+            setChatTabs([newTabResponse.data])
+            targetTab = newTabResponse.data
+            isNewTab = true
+          }
+        }
+
+        if (targetTab) {
+          if (isNewTab) {
+            setActiveTabId(targetTab.id)
+            setActiveTabName(targetTab.name)
+            setMessages([systemMessage])
+          } else {
+            await handleSelectChat(targetTab)
+          }
+        }
+      } catch (error) {
+        console.error('초기 채팅 설정에 실패했습니다:', error)
+      }
+    }
+
+    void initializeChat()
+  }, [handleSelectChat, setMessages])
+
+  useEffect(() => {
+    const currentActiveTab = chatTabs.find((tab) => tab.id === activeTabId)
+    if (currentActiveTab && currentActiveTab.name !== activeTabName) {
+      setActiveTabName(currentActiveTab.name)
+    }
+  }, [chatTabs, activeTabId, activeTabName])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    if (!input.trim() || !activeTabId) return
+
+    const userMessage: Message = { id: uuidv4(), role: 'user', content: input }
+    const aiMessagePlaceholder: Message = { id: uuidv4(), role: 'assistant', content: '' }
+
+    const messagesForApi = [...messages, userMessage]
+    setMessages((prev) => [...prev, userMessage, aiMessagePlaceholder])
+
+    setInput('')
+    setIsLoading(true)
+
+    try {
+      const result = await window.api.invoke<{ success?: boolean; error?: string }>(
+        'chat:completion',
+        {
+          messages: messagesForApi,
+          chatTabId: activeTabId
+        }
+      )
+
+      if (result.error) {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('AI 응답 처리 실패:', error)
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        {
+          id: uuidv4(),
+          role: 'assistant',
+          content: 'AI 응답을 처리하는 데 실패했습니다.'
+        }
+      ])
+      toast.error('AI 응답을 처리하는 데 실패했습니다.')
+      setIsLoading(false)
+    }
+  }
 
   const handleSuggestionClick = (suggestion: string): void => {
     setInput(suggestion)
     textareaRef.current?.focus()
   }
 
-  const handleSubmitCustom = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    if (!input.trim()) return
-
-    const userMessage: Message = {
-      id: `${Date.now()}`,
-      role: 'user',
-      content: input.trim()
-    }
-
-    setTempMessages((prev) => [...prev, userMessage])
-    setInput('')
-    setShowTyping(true)
-
-    // TODO: 추후 AI 응답의 실제 완료 시점을 기반으로 로딩 애니메이션을 종료하도록 수정 필요
-    setTimeout(() => {
-      append({
-        role: 'user',
-        content: userMessage.content
-      })
-      setTempMessages([])
-      setShowTyping(false)
-    }, 5000)
-  }
-
-  console.log(messages)
-
   return (
     <div className="flex-1 h-full bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex flex-col">
-      <ChatHeader onSearchChange={setSearchTerm} />
+      <ChatHeader
+        activeTabName={activeTabName}
+        onSearchChange={setSearchTerm}
+        onSelectChat={handleSelectChat}
+        chatTabs={chatTabs}
+        refreshChatTabs={fetchChatTabs}
+      />
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6">
-        {[...messages, ...tempMessages].map((m, index) => (
+        {messages.map((m, index) => (
           <div key={m.id}>
             <ChatMessage message={m} highlightTerm={searchTerm} />
             {m.role === 'system' && index === 0 && (
@@ -93,15 +229,15 @@ export default function AiChatPanel(): React.JSX.Element {
             )}
           </div>
         ))}
-        {showTyping && <TypingLoadingAnimation className="h-12" />}
+        {isLoading && <TypingLoadingAnimation className="h-12" />}
       </div>
-      <form onSubmit={handleSubmitCustom}>
+      <form onSubmit={handleSubmit}>
         <ChatInput
           ref={textareaRef}
           value={input}
           onChange={handleInputChange}
-          isLoading={isLoading || showTyping}
-          disabled={isLoading || showTyping}
+          isLoading={isLoading}
+          disabled={isLoading || !activeTabId}
         />
       </form>
     </div>
