@@ -1,18 +1,14 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import ChatHeader from './chat-header'
 import ChatInput from './chat-input'
 import ChatMessage from './chat-message'
 import { Sparkles } from 'lucide-react'
 import TypingLoadingAnimation from './typing-loading-animation'
-import {
-  getChatTabMessages,
-  sendMessageToTab,
-  getChatTabs,
-  createChatTab
-} from '../../../utils/chatApi'
-import { Message } from '@ai-sdk/react'
+import { getChatTabs, createChatTab, getChatTabMessages } from '../../../utils/chatApi'
+import { Message, useChat } from '@ai-sdk/react'
 import { ChatTab } from './ai-chat.types'
 import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 const initialSuggestions = [
   '가장 많이 팔린 상품 5개 보여줘',
@@ -26,21 +22,23 @@ const systemMessage: Message = {
   content: '안녕하세요!\n자연어로 데이터베이스에 질문하시면 SQL 쿼리를 자동으로 생성해드립니다.'
 }
 
-/**
- * @author nahyeongjin1
- * @summary AI 질의 화면
- * @returns JSX.Element
- */
 export default function AiChatPanel(): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const [activeTabName, setActiveTabName] = useState<string>('AI 채팅')
-  const [messages, setMessages] = useState<Message[]>([systemMessage])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [chatTabs, setChatTabs] = useState<ChatTab[]>([])
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const initialized = useRef(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const { messages, input, handleInputChange, setMessages, isLoading, setInput, append } = useChat({
+    body: {
+      chatTabId: activeTabId
+    },
+    onError: (error) => {
+      console.error('채팅 중 에러 발생:', error)
+      toast.error('메시지 전송에 실패했습니다. 다시 시도해주세요.')
+    }
+  })
 
   const fetchChatTabs = async (): Promise<void> => {
     try {
@@ -59,14 +57,35 @@ export default function AiChatPanel(): React.JSX.Element {
     }
   }
 
+  const handleSelectChat = useCallback(
+    async (tab: ChatTab): Promise<void> => {
+      setActiveTabId(tab.id)
+      setActiveTabName(tab.name)
+      try {
+        const response = await getChatTabMessages(tab.id)
+        if (response && response.data && response.data.messages) {
+          const fetchedMessages: Message[] = response.data.messages.map((msg) => ({
+            id: msg.id,
+            role: msg.sender === 'U' ? 'user' : 'assistant',
+            content: msg.message
+          }))
+          setMessages([systemMessage, ...fetchedMessages])
+        } else {
+          setMessages([systemMessage])
+        }
+      } catch (error) {
+        console.error('채팅 메시지를 불러오는 데 실패했습니다:', error)
+        setMessages([systemMessage])
+      }
+    },
+    [setMessages]
+  )
+
   useEffect(() => {
-    if (initialized.current) {
-      return
-    }
+    if (initialized.current) return
     initialized.current = true
 
     const initializeChat = async (): Promise<void> => {
-      setIsLoading(true)
       try {
         const tabsResponse = await getChatTabs()
         let targetTab: ChatTab | null = null
@@ -90,14 +109,11 @@ export default function AiChatPanel(): React.JSX.Element {
         }
       } catch (error) {
         console.error('초기 채팅 설정에 실패했습니다:', error)
-        setMessages([systemMessage])
-      } finally {
-        setIsLoading(false)
       }
     }
 
     void initializeChat()
-  }, [])
+  }, [handleSelectChat])
 
   useEffect(() => {
     const currentActiveTab = chatTabs.find((tab) => tab.id === activeTabId)
@@ -106,71 +122,37 @@ export default function AiChatPanel(): React.JSX.Element {
     }
   }, [chatTabs, activeTabId, activeTabName])
 
-  const handleSelectChat = async (tab: ChatTab): Promise<void> => {
-    setActiveTabId(tab.id)
-    setActiveTabName(tab.name)
-    setIsLoading(true)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    if (!input.trim() || !activeTabId) return
+
+    const userMessage: Message = { id: uuidv4(), role: 'user', content: input }
+    append(userMessage)
+    setInput('')
 
     try {
-      const response = await getChatTabMessages(tab.id)
-      if (response && response.data && response.data.messages) {
-        const fetchedMessages: Message[] = response.data.messages.map((msg) => ({
-          id: msg.id,
-          role: msg.sender === 'U' ? 'user' : 'assistant',
-          content: msg.message
-        }))
-        setMessages([systemMessage, ...fetchedMessages])
-      } else {
-        setMessages([systemMessage])
+      const result = await window.api.invoke<{ body: ReadableStream<Uint8Array>; error?: string }>(
+        'chat:completion',
+        {
+          messages: [...messages, userMessage],
+          chatTabId: activeTabId
+        }
+      )
+
+      if (result.error) {
+        throw new Error(result.error)
       }
+      const aiResponse = await new Response(result.body).text()
+      append({ id: uuidv4(), role: 'assistant', content: aiResponse })
     } catch (error) {
-      console.error('채팅 메시지를 불러오는 데 실패했습니다:', error)
-      setMessages([systemMessage])
-    } finally {
-      setIsLoading(false)
+      console.error('AI 응답 처리 실패:', error)
+      append({ id: uuidv4(), role: 'assistant', content: 'AI 응답을 처리하는 데 실패했습니다.' })
     }
   }
 
   const handleSuggestionClick = (suggestion: string): void => {
     setInput(suggestion)
     textareaRef.current?.focus()
-  }
-
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault()
-    if (!input.trim() || !activeTabId) return
-
-    const userMessage: Message = {
-      id: `${Date.now()}`,
-      role: 'user',
-      content: input.trim()
-    }
-
-    setMessages((prevMessages) => [...prevMessages, userMessage])
-    setInput('')
-    setIsLoading(true)
-
-    try {
-      const response = await sendMessageToTab(activeTabId, userMessage.content)
-      if (response && response.data) {
-        const aiMessage: Message = {
-          id: response.data.id,
-          role: 'assistant',
-          content: response.data.message
-        }
-        setMessages((prevMessages) => [...prevMessages, aiMessage])
-      }
-    } catch (error) {
-      console.error('메시지 전송에 실패했습니다:', error)
-      const errorMessage: Message = {
-        id: `${Date.now()}-error`,
-        role: 'assistant',
-        content: '메시지 전송에 실패했습니다. 다시 시도해주세요.'
-      }
-      setMessages((prevMessages) => [...prevMessages, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   return (
@@ -210,7 +192,7 @@ export default function AiChatPanel(): React.JSX.Element {
         <ChatInput
           ref={textareaRef}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           isLoading={isLoading}
           disabled={isLoading || !activeTabId}
         />
