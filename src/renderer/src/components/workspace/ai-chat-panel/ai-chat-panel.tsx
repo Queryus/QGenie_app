@@ -32,15 +32,36 @@ export default function AiChatPanel(): React.JSX.Element {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { messages, input, handleInputChange, setMessages, setInput } = useChat({
-    // 스트리밍이 아닌 수동 데이터 처리를 위해 api, body, onFinish 등을 제거
-    onError: (error) => {
-      // 이 onError는 이제 useChat 내부 로직과 관련 없으므로,
-      // handleSubmit에서 직접 에러를 처리하는 것이 더 명확합니다.
-      console.error('useChat에서 예상치 못한 에러:', error)
-      toast.error('채팅 처리 중 오류가 발생했습니다.')
+    initialMessages: [systemMessage]
+  })
+
+  useEffect(() => {
+    const handleStreamChunk = (_event, chunk: unknown): void => {
+      if (typeof chunk !== 'string') return
+      setMessages((prevMessages) => {
+        const lastMessage = prevMessages[prevMessages.length - 1]
+        if (lastMessage?.role === 'assistant') {
+          return [
+            ...prevMessages.slice(0, -1),
+            { ...lastMessage, content: lastMessage.content + chunk }
+          ]
+        }
+        return prevMessages
+      })
+    }
+
+    const handleStreamEnd = (): void => {
       setIsLoading(false)
     }
-  })
+
+    const cleanupChunk = window.api.on('chat:completion-stream-chunk', handleStreamChunk)
+    const cleanupEnd = window.api.on('chat:completion-stream-end', handleStreamEnd)
+
+    return () => {
+      cleanupChunk()
+      cleanupEnd()
+    }
+  }, [setMessages])
 
   const fetchChatTabs = async (): Promise<void> => {
     try {
@@ -137,16 +158,19 @@ export default function AiChatPanel(): React.JSX.Element {
     if (!input.trim() || !activeTabId) return
 
     const userMessage: Message = { id: uuidv4(), role: 'user', content: input }
-    setMessages([...messages, userMessage])
+    const aiMessagePlaceholder: Message = { id: uuidv4(), role: 'assistant', content: '' }
+
+    const messagesForApi = [...messages, userMessage]
+    setMessages((prev) => [...prev, userMessage, aiMessagePlaceholder])
+
     setInput('')
     setIsLoading(true)
 
     try {
-      const result = await window.api.invoke<{ message?: string; error?: string }>(
+      const result = await window.api.invoke<{ success?: boolean; error?: string }>(
         'chat:completion',
         {
-          // 중요: AI에게 컨텍스트를 제공하기 위해 이전 메시지들을 함께 보냅니다.
-          messages: [...messages, userMessage],
+          messages: messagesForApi,
           chatTabId: activeTabId
         }
       )
@@ -154,23 +178,17 @@ export default function AiChatPanel(): React.JSX.Element {
       if (result.error) {
         throw new Error(result.error)
       }
-
-      if (result.message) {
-        const aiMessage: Message = { id: uuidv4(), role: 'assistant', content: result.message }
-        setMessages((prevMessages) => [...prevMessages, aiMessage])
-      } else {
-        throw new Error('Invalid response from main process')
-      }
     } catch (error) {
       console.error('AI 응답 처리 실패:', error)
-      const errorMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: 'AI 응답을 처리하는 데 실패했습니다.'
-      }
-      setMessages((prevMessages) => [...prevMessages, errorMessage])
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        {
+          id: uuidv4(),
+          role: 'assistant',
+          content: 'AI 응답을 처리하는 데 실패했습니다.'
+        }
+      ])
       toast.error('AI 응답을 처리하는 데 실패했습니다.')
-    } finally {
       setIsLoading(false)
     }
   }
