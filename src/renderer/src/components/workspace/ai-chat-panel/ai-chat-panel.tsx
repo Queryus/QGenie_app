@@ -27,16 +27,18 @@ export default function AiChatPanel(): React.JSX.Element {
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const [activeTabName, setActiveTabName] = useState<string>('AI 채팅')
   const [chatTabs, setChatTabs] = useState<ChatTab[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const initialized = useRef(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const { messages, input, handleInputChange, setMessages, isLoading, setInput, append } = useChat({
-    body: {
-      chatTabId: activeTabId
-    },
+  const { messages, input, handleInputChange, setMessages, setInput } = useChat({
+    // 스트리밍이 아닌 수동 데이터 처리를 위해 api, body, onFinish 등을 제거
     onError: (error) => {
-      console.error('채팅 중 에러 발생:', error)
-      toast.error('메시지 전송에 실패했습니다. 다시 시도해주세요.')
+      // 이 onError는 이제 useChat 내부 로직과 관련 없으므로,
+      // handleSubmit에서 직접 에러를 처리하는 것이 더 명확합니다.
+      console.error('useChat에서 예상치 못한 에러:', error)
+      toast.error('채팅 처리 중 오류가 발생했습니다.')
+      setIsLoading(false)
     }
   })
 
@@ -89,6 +91,7 @@ export default function AiChatPanel(): React.JSX.Element {
       try {
         const tabsResponse = await getChatTabs()
         let targetTab: ChatTab | null = null
+        let isNewTab = false
 
         if (tabsResponse && tabsResponse.data && tabsResponse.data.length > 0) {
           const sortedTabs = tabsResponse.data.sort(
@@ -101,11 +104,18 @@ export default function AiChatPanel(): React.JSX.Element {
           if (newTabResponse && newTabResponse.data) {
             setChatTabs([newTabResponse.data])
             targetTab = newTabResponse.data
+            isNewTab = true
           }
         }
 
         if (targetTab) {
-          await handleSelectChat(targetTab)
+          if (isNewTab) {
+            setActiveTabId(targetTab.id)
+            setActiveTabName(targetTab.name)
+            setMessages([systemMessage])
+          } else {
+            await handleSelectChat(targetTab)
+          }
         }
       } catch (error) {
         console.error('초기 채팅 설정에 실패했습니다:', error)
@@ -113,7 +123,7 @@ export default function AiChatPanel(): React.JSX.Element {
     }
 
     void initializeChat()
-  }, [handleSelectChat])
+  }, [handleSelectChat, setMessages])
 
   useEffect(() => {
     const currentActiveTab = chatTabs.find((tab) => tab.id === activeTabId)
@@ -127,13 +137,15 @@ export default function AiChatPanel(): React.JSX.Element {
     if (!input.trim() || !activeTabId) return
 
     const userMessage: Message = { id: uuidv4(), role: 'user', content: input }
-    append(userMessage)
+    setMessages([...messages, userMessage])
     setInput('')
+    setIsLoading(true)
 
     try {
-      const result = await window.api.invoke<{ body: ReadableStream<Uint8Array>; error?: string }>(
+      const result = await window.api.invoke<{ message?: string; error?: string }>(
         'chat:completion',
         {
+          // 중요: AI에게 컨텍스트를 제공하기 위해 이전 메시지들을 함께 보냅니다.
           messages: [...messages, userMessage],
           chatTabId: activeTabId
         }
@@ -142,11 +154,24 @@ export default function AiChatPanel(): React.JSX.Element {
       if (result.error) {
         throw new Error(result.error)
       }
-      const aiResponse = await new Response(result.body).text()
-      append({ id: uuidv4(), role: 'assistant', content: aiResponse })
+
+      if (result.message) {
+        const aiMessage: Message = { id: uuidv4(), role: 'assistant', content: result.message }
+        setMessages((prevMessages) => [...prevMessages, aiMessage])
+      } else {
+        throw new Error('Invalid response from main process')
+      }
     } catch (error) {
       console.error('AI 응답 처리 실패:', error)
-      append({ id: uuidv4(), role: 'assistant', content: 'AI 응답을 처리하는 데 실패했습니다.' })
+      const errorMessage: Message = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: 'AI 응답을 처리하는 데 실패했습니다.'
+      }
+      setMessages((prevMessages) => [...prevMessages, errorMessage])
+      toast.error('AI 응답을 처리하는 데 실패했습니다.')
+    } finally {
+      setIsLoading(false)
     }
   }
 

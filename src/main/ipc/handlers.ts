@@ -46,18 +46,22 @@ export function registerIpcHandlers(mainWindow?: BrowserWindow): void {
     }
 
     try {
-      // API.md에 명시된 API 호출
-      const response = await axios.post('http://localhost:39722/api/chatMessages/create', {
+      const requestBody = {
         chat_tab_id: chatTabId,
         message: userMessage
-      })
+      }
+      console.log('Sending request to backend:', JSON.stringify(requestBody, null, 2))
+
+      // API.md에 명시된 API 호출
+      const response = await axios.post(
+        'http://localhost:39722/api/chatMessages/create',
+        requestBody
+      )
 
       // API 응답 형식에 맞춰 AI 메시지 반환
       if (response.data && response.data.data) {
-        // Vercel AI SDK는 스트림을 기대하지만, 일반 응답을 스트림처럼 보내서 호환성 맞춤
-        // 실제 스트리밍 API가 생기면 이 부분을 교체해야 함
         const aiMessage = response.data.data.message
-        return new Response(aiMessage)
+        return { message: aiMessage }
       } else {
         throw new Error('Invalid API response format')
       }
