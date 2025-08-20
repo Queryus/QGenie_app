@@ -1,11 +1,16 @@
 appId: com.Queryus.QGenie
 productName: QGenie
+extraResources:
+  - from: 'resources/'
+    to: 'resources'
+    filter:
+      - '**/*'
 directories:
   output: dist
   buildResources: build
 files:
-  - "out/**"
-  - "package.json"
+  - 'out/**'
+  - 'package.json'
 asarUnpack:
   - resources/**
 win:
@@ -21,6 +26,9 @@ mac:
   icon: build/icon.icns
   target: dmg
   entitlementsInherit: build/entitlements.mac.plist
+  binaries:
+    - resources/mac/qgenie-api
+    - resources/mac/qgenie-ai
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -42,4 +50,3 @@ publish:
   provider: github
   owner: Queryus
   repo: QGenie_app
-

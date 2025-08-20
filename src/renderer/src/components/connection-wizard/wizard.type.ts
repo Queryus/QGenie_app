@@ -1,3 +1,10 @@
+import mysqlIcon from '../../assets/database-image/mysql.png'
+import mariadbIcon from '../../assets/database-image/mariadb.png'
+import postgresqlIcon from '../../assets/database-image/postgresql.png'
+import sqliteIcon from '../../assets/database-image/sqlite.png'
+import microsoftIcon from '../../assets/database-image/microsoft.png'
+import oracleIcon from '../../assets/database-image/oracle.png'
+
 export enum DBSetupStep {
   SelectDatabase = 'selectDatabase',
   InstallDriver = 'installDriver',
@@ -36,17 +43,17 @@ export interface DatabaseInfo {
 }
 
 export const DATABASES: DatabaseInfo[] = [
-  { key: Database.MySQL, label: 'MySQL', icon: '/mysql.png', id: 'mysql' },
-  { key: Database.MariaDB, label: 'MariaDB', icon: '/mariadb.png', id: 'mariadb' },
-  { key: Database.PostgreSQL, label: 'PostgreSQL', icon: '/postgresql.png', id: 'postgresql' },
-  { key: Database.SQLite, label: 'SQLite', icon: '/sqlite.png', id: 'sqlite' },
+  { key: Database.MySQL, label: 'MySQL', icon: mysqlIcon, id: 'mysql' },
+  { key: Database.MariaDB, label: 'MariaDB', icon: mariadbIcon, id: 'mariadb' },
+  { key: Database.PostgreSQL, label: 'PostgreSQL', icon: postgresqlIcon, id: 'postgresql' },
+  { key: Database.SQLite, label: 'SQLite', icon: sqliteIcon, id: 'sqlite' },
   {
     key: Database.MicrosoftSQLServer,
     label: 'Microsoft SQL Server',
-    icon: '/microsoft.png',
+    icon: microsoftIcon,
     id: 'sqlserver'
   },
-  { key: Database.Oracle, label: 'Oracle', icon: '/oracle.png', id: 'oracle' }
+  { key: Database.Oracle, label: 'Oracle', icon: oracleIcon, id: 'oracle' }
 ]
 
 export interface ConnectionDetail {

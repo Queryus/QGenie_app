@@ -200,6 +200,7 @@ export function ConnectionWizard(): JSX.Element {
             <TestConnection
               selectedDatabase={selectedDatabase!}
               connectionDetail={connectionDetail}
+              isTested={isTested}
               setIsTested={setIsTested}
             />
           )}

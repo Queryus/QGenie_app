@@ -6,12 +6,14 @@ import { api } from '@renderer/utils/api'
 interface TestConnectionProp {
   selectedDatabase: DatabaseInfo
   connectionDetail: ConnectionDetail
+  isTested: boolean
   setIsTested: (isTested: boolean) => void
 }
 
 export default function TestConnection({
   selectedDatabase,
   connectionDetail,
+  isTested,
   setIsTested
 }: TestConnectionProp): React.JSX.Element {
   const handleTest = async (): Promise<void> => {
@@ -30,6 +32,7 @@ export default function TestConnection({
       .post('/api/user/db/connect/test', filteredPayload)
       .then((response) => {
         const flag = response.data as boolean
+        toast.success('데이터베이스 연결 테스트 완료 🎉')
         setIsTested(flag)
       })
       .catch(() => {
@@ -56,9 +59,9 @@ export default function TestConnection({
             data-status="Point"
             className="bg-gradient-genie-primary rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2"
           >
-            <Button size={'sm'} onClick={handleTest}>
+            <Button size={'sm'} onClick={handleTest} disabled={isTested}>
               <div className="justify-start text-genie-100 text-xs font-semibold font-['Pretendard'] leading-[18px]">
-                연결 테스트 시작하기
+                {isTested ? '완료' : '연결 테스트'}
               </div>
             </Button>
           </div>

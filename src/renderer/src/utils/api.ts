@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const api = axios.create({ baseURL: `http://localhost:39722` })
+export const api = axios.create({ baseURL: `http://127.0.0.1:39722` })
 
 // 요청 전 configuration
 api.interceptors.request.use(
