@@ -31,7 +31,7 @@ export const getChatTabMessages = async (
   tabId: string
 ): Promise<ApiResponse<ChatTabWithMessages>> => {
   const response = (await api.get(
-    `/api/chatTabs/find/${tabId}`
+    `/api/chatMessages/find/${tabId}`
   )) as ApiResponse<ChatTabWithMessages>
   return response
 }
