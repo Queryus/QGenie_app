@@ -51,3 +51,24 @@ export const sendMessageToTab = async (
   })) as ApiResponse<ApiChatMessage>
   return response
 }
+
+/**
+ * 특정 AI 채팅 탭의 이름을 수정합니다.
+ * @param tabId 수정할 탭의 ID
+ * @param name 새로운 탭 이름
+ */
+export const updateChatTab = async (tabId: string, name: string): Promise<ApiResponse<ChatTab>> => {
+  const response = (await api.put(`/api/chatTabs/modify/${tabId}`, {
+    name
+  })) as ApiResponse<ChatTab>
+  return response
+}
+
+/**
+ * 특정 AI 채팅 탭을 삭제합니다.
+ * @param tabId 삭제할 탭의 ID
+ */
+export const deleteChatTab = async (tabId: string): Promise<ApiResponse<null>> => {
+  const response = (await api.delete(`/api/chatTabs/remove/${tabId}`)) as ApiResponse<null>
+  return response
+}

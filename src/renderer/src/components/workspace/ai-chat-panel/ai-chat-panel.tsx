@@ -4,8 +4,14 @@ import ChatInput from './chat-input'
 import ChatMessage from './chat-message'
 import { Sparkles } from 'lucide-react'
 import TypingLoadingAnimation from './typing-loading-animation'
-import { getChatTabMessages, sendMessageToTab } from '../../../utils/chatApi'
+import {
+  getChatTabMessages,
+  sendMessageToTab,
+  getChatTabs,
+  createChatTab
+} from '../../../utils/chatApi'
 import { Message } from '@ai-sdk/react'
+import { ChatTab } from './ai-chat.types'
 
 const initialSuggestions = [
   '가장 많이 팔린 상품 5개 보여줘',
@@ -31,9 +37,45 @@ export default function AiChatPanel(): React.JSX.Element {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const initialized = useRef(false)
 
   useEffect(() => {
-    // TODO: 컴포넌트 마운트 시 가장 최근 탭을 활성화하거나, 탭이 없으면 새로 생성하는 로직 추가
+    if (initialized.current) {
+      return
+    }
+    initialized.current = true
+
+    const initializeChat = async (): Promise<void> => {
+      setIsLoading(true)
+      try {
+        const tabsResponse = await getChatTabs()
+        let targetTab: ChatTab | null = null
+
+        if (tabsResponse && tabsResponse.data && tabsResponse.data.length > 0) {
+          // 가장 최근에 업데이트된 탭을 찾습니다.
+          targetTab = tabsResponse.data.sort(
+            (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          )[0]
+        } else {
+          // 탭이 없으면 새로 생성합니다.
+          const newTabResponse = await createChatTab('New Chat 1')
+          if (newTabResponse && newTabResponse.data) {
+            targetTab = newTabResponse.data
+          }
+        }
+
+        if (targetTab) {
+          await handleSelectChat(targetTab.id)
+        }
+      } catch (error) {
+        console.error('초기 채팅 설정에 실패했습니다:', error)
+        setMessages([systemMessage])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void initializeChat()
   }, [])
 
   const handleSelectChat = async (tabId: string): Promise<void> => {
@@ -74,7 +116,8 @@ export default function AiChatPanel(): React.JSX.Element {
       content: input.trim()
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    // 사용자가 보낸 메시지를 먼저 화면에 표시 (낙관적 업데이트)
+    setMessages((prevMessages) => [...prevMessages, userMessage])
     setInput('')
     setIsLoading(true)
 
@@ -86,7 +129,8 @@ export default function AiChatPanel(): React.JSX.Element {
           role: 'assistant',
           content: response.data.message
         }
-        setMessages((prev) => [...prev, aiMessage])
+        // AI 응답을 기존 메시지 목록에 추가
+        setMessages((prevMessages) => [...prevMessages, aiMessage])
       }
     } catch (error) {
       console.error('메시지 전송에 실패했습니다:', error)
@@ -96,7 +140,8 @@ export default function AiChatPanel(): React.JSX.Element {
         role: 'assistant',
         content: '메시지 전송에 실패했습니다. 다시 시도해주세요.'
       }
-      setMessages((prev) => [...prev.slice(0, -1), errorMessage]) // 낙관적 업데이트 롤백
+      // 에러 메시지를 기존 메시지 목록에 추가
+      setMessages((prevMessages) => [...prevMessages, errorMessage])
     } finally {
       setIsLoading(false)
     }
