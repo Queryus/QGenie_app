@@ -2,10 +2,14 @@ import { useState } from 'react'
 import { BotMessageSquare, History } from 'lucide-react'
 import SearchBar from './search-bar'
 import ChatHistoryPanel from './chat-history-panel'
+import { ChatTab } from './ai-chat.types'
 
 interface ChatHeaderProps {
+  activeTabName: string
   onSearchChange: (term: string) => void
-  onSelectChat: (tabId: string) => void
+  onSelectChat: (tab: ChatTab) => void
+  chatTabs: ChatTab[]
+  refreshChatTabs: () => Promise<void>
 }
 
 /**
@@ -15,8 +19,11 @@ interface ChatHeaderProps {
  * @returns JSX.Element
  */
 export default function ChatHeader({
+  activeTabName,
   onSearchChange,
-  onSelectChat
+  onSelectChat,
+  chatTabs,
+  refreshChatTabs
 }: ChatHeaderProps): React.JSX.Element {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
@@ -24,8 +31,8 @@ export default function ChatHeader({
     setIsHistoryOpen((prev) => !prev)
   }
 
-  const handleSelectChat = (tabId: string): void => {
-    onSelectChat(tabId)
+  const handleSelectChat = (tab: ChatTab): void => {
+    onSelectChat(tab)
     setIsHistoryOpen(false) // 채팅 선택 후 패널 닫기
   }
 
@@ -33,8 +40,11 @@ export default function ChatHeader({
     <div className="self-stretch pl-4 pr-3 py-3 bg-neutral-800 border-b border-neutral-700 inline-flex justify-between items-center">
       <div className="flex justify-start items-center gap-2">
         <BotMessageSquare className="size-4 stroke-[#E4E4E4]" />
-        <div className="justify-start text-neutral-200 text-sm font-bold font-['Pretendard'] leading-tight">
-          AI 채팅
+        <div
+          className="justify-start text-genie-100 text-title font-pretendard truncate"
+          title={activeTabName}
+        >
+          {activeTabName}
         </div>
       </div>
       <div className="flex justify-start items-center gap-4">
@@ -43,7 +53,13 @@ export default function ChatHeader({
           <button onClick={toggleHistory} className="focus:outline-none">
             <History className="size-4 stroke-[#E4E4E4] cursor-pointer" />
           </button>
-          {isHistoryOpen && <ChatHistoryPanel onSelectChat={handleSelectChat} />}
+          {isHistoryOpen && (
+            <ChatHistoryPanel
+              onSelectChat={handleSelectChat}
+              chatTabs={chatTabs}
+              refreshChatTabs={refreshChatTabs}
+            />
+          )}
         </div>
       </div>
     </div>
