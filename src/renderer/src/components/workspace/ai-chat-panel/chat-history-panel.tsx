@@ -34,9 +34,12 @@ export default function ChatHistoryPanel(): React.JSX.Element {
           </div>
         ))}
       </div>
-      <button className="mt-2 w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-[#5F27CD] text-white text-xs font-semibold">
-        <Plus className="size-4" /> 새 채팅
-      </button>
+      <div className="w-full flex justify-end">
+        <button className="w-21 flex items-center justify-between gap-2 py-1.5 px-3 rounded-lg bg-gradient-genie-primary">
+          <Plus className="size-4 stroke-genie-100" />
+          <p className="text-button font-pretendard text-genie-100">새 채팅</p>
+        </button>
+      </div>
     </div>
   )
 }
