@@ -1,48 +1,45 @@
-import { useState } from 'react'
-import { SchemaNode } from './db-schema.types'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { api } from '@renderer/utils/api'
+import { SchemaNode, SchemaNodeType } from './db-schema.types'
 import SchemaTreeItem from './schema-tree-item'
 
-// TODO: 추후 API 연동을 통해 실제 DB 스키마 데이터로 교체
-const MOCK_SCHEMA_DATA: SchemaNode[] = [
-  {
-    id: 'db-1',
-    name: 'DEMO_DATA',
-    type: 'database',
-    children: [
-      {
-        id: 'schema-1',
-        name: 'INFORMATION_SCHEMA',
-        type: 'schema',
-        children: [
-          {
-            id: 'folder-1',
-            name: 'tables',
-            type: 'folder',
-            children: [
-              { id: 'table-1', name: 'ITEM', type: 'table' },
-              { id: 'table-2', name: 'CUSTOMER', type: 'table' },
-              { id: 'table-3', name: 'ORDERS', type: 'table' },
-              { id: 'table-4', name: 'PRODUCT', type: 'table' },
-              { id: 'table-5', name: 'SALES', type: 'table' },
-              { id: 'table-6', name: 'EMPLOYEE', type: 'table' }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-]
+// API 응답 타입을 위한 인터페이스 정의
+interface ApiResponse<T> {
+  code: string
+  message: string
+  data: T
+}
 
-/**
- * @author nahyeongjin1
- * @summary 재귀적으로 모든 노드의 ID를 수집하여 초기 펼침 상태를 설정하는 함수
- * @param nodes 스키마 노드 배열
- * @returns 모든 노드 ID를 키로, true를 값으로 갖는 객체
- */
+interface DbProfile {
+  id: string
+  view_name?: string
+  name?: string
+}
+
+interface ColumnInfo {
+  name: string
+}
+
+interface TableInfo {
+  name: string
+  columns: ColumnInfo[]
+}
+
+interface SchemaInfo {
+  schema_name: string
+  tables: TableInfo[]
+}
+
+interface DbInfo {
+  db_name: string
+  schemas: SchemaInfo[]
+}
+
 const initializeExpandedState = (nodes: SchemaNode[]): Record<string, boolean> => {
   let state: Record<string, boolean> = {}
   nodes.forEach((node) => {
-    state[node.id] = true // 기본적으로 모든 노드를 펼침 상태로 설정
+    state[node.id] = true
     if (node.children) {
       state = { ...state, ...initializeExpandedState(node.children) }
     }
@@ -56,9 +53,81 @@ const initializeExpandedState = (nodes: SchemaNode[]): Record<string, boolean> =
  * @returns JSX.Element
  */
 export default function DbSchemaPanel(): React.JSX.Element {
-  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>(() =>
-    initializeExpandedState(MOCK_SCHEMA_DATA)
-  )
+  const [schemaData, setSchemaData] = useState<SchemaNode[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    const fetchSchemaData = async (): Promise<void> => {
+      try {
+        const profilesRes = (await api.get('/api/user/db/find/all')) as unknown as ApiResponse<
+          DbProfile[]
+        >
+        const profiles = profilesRes.data
+
+        if (!profiles || !Array.isArray(profiles)) {
+          throw new Error('Invalid profile data received')
+        }
+
+        const allSchemasPromises = profiles.map((profile) =>
+          api.get(`/api/user/db/find/hierarchical-schema/${profile.id}`)
+        )
+        const allSchemasRes = (await Promise.all(allSchemasPromises)) as unknown as ApiResponse<
+          DbInfo[]
+        >[]
+
+        const transformedData = profiles
+          .map((profile, index) => {
+            const response = allSchemasRes[index]
+
+            if (
+              response.code !== '2000' ||
+              !response.data ||
+              !Array.isArray(response.data) ||
+              response.data.length === 0
+            ) {
+              console.warn(
+                `Could not fetch schema for ${profile.view_name}: ${response.message || 'Empty data'}`
+              )
+              return null
+            }
+
+            const dbInfo = response.data[0]
+            return {
+              id: profile.id,
+              name: profile.view_name || dbInfo.db_name || profile.id,
+              type: 'database' as SchemaNodeType,
+              children: (dbInfo.schemas || []).map((schema) => ({
+                id: `${profile.id}-${schema.schema_name}`,
+                name: schema.schema_name,
+                type: 'schema' as SchemaNodeType,
+                children: (schema.tables || []).map((table) => ({
+                  id: `${profile.id}-${schema.schema_name}-${table.name}`,
+                  name: table.name,
+                  type: 'table' as SchemaNodeType,
+                  children: (table.columns || []).map((column) => ({
+                    id: `${profile.id}-${schema.schema_name}-${table.name}-${column.name}`,
+                    name: column.name,
+                    type: 'column' as SchemaNodeType
+                  }))
+                }))
+              }))
+            }
+          })
+          .filter(Boolean) as SchemaNode[]
+
+        setSchemaData(transformedData)
+        setExpandedNodes(initializeExpandedState(transformedData))
+      } catch (error) {
+        toast.error('데이터베이스 스키마 정보를 불러오는 데 실패했습니다.')
+        console.error(error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSchemaData()
+  }, [])
 
   const handleToggle = (nodeId: string): void => {
     setExpandedNodes((prev) => ({
@@ -67,9 +136,17 @@ export default function DbSchemaPanel(): React.JSX.Element {
     }))
   }
 
+  if (isLoading) {
+    return (
+      <div className="w-56 h-full p-3 bg-neutral-800 flex items-center justify-center">
+        <p className="text-neutral-400 text-sm">로딩 중...</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-56 h-full p-3 bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex-col justify-start items-start inline-flex">
-      {MOCK_SCHEMA_DATA.map((node) => (
+    <div className="w-56 h-full p-3 bg-neutral-800 outline-1 outline-offset-[-1px] outline-neutral-700 flex-col justify-start items-start inline-flex overflow-y-auto">
+      {schemaData.map((node) => (
         <SchemaTreeItem
           key={node.id}
           node={node}

@@ -5,15 +5,15 @@ import { cn } from '@/lib/utils'
 const ICONS: SchemaIconMap = {
   database: TableProperties,
   schema: ListTree,
-  folder: FolderOpen,
-  table: TableProperties
+  table: FolderOpen,
+  column: TableProperties
 }
 
 const ICON_COLORS: Record<string, string> = {
   database: 'stroke-[#808080]',
   schema: 'stroke-[#808080]',
-  folder: 'stroke-[#73B2FF]',
-  table: 'stroke-[#9F73FF]'
+  table: 'stroke-[#73B2FF]',
+  column: 'stroke-[#9F73FF]'
 }
 
 /**
@@ -47,7 +47,7 @@ export default function SchemaTreeItem({
       <div
         data-state="Default"
         className="self-stretch pr-1 py-1 rounded inline-flex justify-start items-center gap-2 cursor-pointer"
-        style={{ paddingLeft: `${level * 1.5 + 0.25}rem` }}
+        style={{ paddingLeft: `${level * 20 + 4}px` }}
         onClick={handleToggle}
       >
         <div className="size-3 flex items-center justify-center">
