@@ -50,8 +50,10 @@ export function createSubWindow({
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../../out/preload/index.cjs'),
-      sandbox: true
+      preload: join(__dirname, '../preload/index.cjs'),
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
@@ -63,13 +65,10 @@ export function createSubWindow({
     subWindow = null
   })
 
-  /**
-   * NOTE: 해시 라우팅
-   */
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     subWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}#${route}`)
   } else {
-    subWindow.loadFile(join(__dirname, '../../renderer/index.html'), {
+    subWindow.loadFile(join(__dirname, '../renderer/index.html'), {
       hash: route
     })
   }

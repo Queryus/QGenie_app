@@ -1,5 +1,5 @@
 import { DATABASES, ConnectionDetail } from './wizard.type'
-
+import AppIcon from '../../assets/icon.svg'
 interface ConfirmSettingsProp {
   connectionDetail: ConnectionDetail
 }
@@ -50,7 +50,7 @@ export default function ConfirmSettings({
 
   return (
     <div className="self-stretch pt-6 inline-flex flex-col justify-start items-center gap-6">
-      <div className="size-[100px] bg-genie-700 rounded-full" />
+      <img src={AppIcon} className="size-[100px]" />
       <div className="self-stretch text-center justify-start text-genie-100 text-base font-bold font-['Pretendard'] leading-normal">
         연결 설정 완료!
       </div>
