@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain, shell, dialog } from 'electron'
 import fs from 'fs'
 import { createSubWindow } from '../windows/subWindow'
 import axios from 'axios'
+import { getMainWindow } from '../windows/mainWindow'
 
 /**
  * NOTE: IPC Handler 한 번에 등록, 관리
@@ -33,6 +34,14 @@ export function registerIpcHandlers(mainWindow?: BrowserWindow): void {
   ipcMain.on('close-current-window', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     win?.close()
+  })
+
+  // 연결 목록 업데이트 신호 중계
+  ipcMain.on('connections-updated', () => {
+    const mainWindow = getMainWindow()
+    if (mainWindow) {
+      mainWindow.webContents.send('connections-updated')
+    }
   })
 
   // 파일 저장 핸들러: SQL

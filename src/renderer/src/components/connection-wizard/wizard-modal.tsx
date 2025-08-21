@@ -148,35 +148,31 @@ export function ConnectionWizard(): JSX.Element {
 
     const filteredPayload = Object.fromEntries(Object.entries(payload).filter(([, v]) => v != null))
 
-    api
-      .post('/api/user/db/create/profile', filteredPayload)
-      .then((response) => {
-        const id = response.data.id as string
-        setConnectionDetail((prev) => ({
-          ...prev,
-          id: id
-        }))
-        createAnnotation(id)
-      })
-      .catch(() => {
-        toast.error('데이터베이스 연결 생성 중 오류가 발생했습니다.')
-      })
-      .finally(() => {
-        // NOTE: 페이지 새로고침 -> 저장된거 불러오도록
-        window.location.reload()
-        onClose()
-      })
+    try {
+      const response = await api.post('/api/user/db/create/profile', filteredPayload)
+      const id = response.data.id as string
+      await createAnnotation(id)
+
+      // 메인 프로세스를 통해 메인 윈도우에 변경 사항을 알립니다.
+      window.electron.ipcRenderer.send('connections-updated')
+      toast.success('데이터베이스 연결이 성공적으로 저장되었습니다.')
+      onClose()
+    } catch (error) {
+      toast.error('데이터베이스 연결 저장 중 오류가 발생했습니다.')
+      console.error('Failed to save connection:', error)
+    }
   }
 
-  const createAnnotation = (db_profile_id: string): void => {
-    api
-      .post('/api/annotations/create', {
+  const createAnnotation = async (db_profile_id: string): Promise<void> => {
+    try {
+      await api.post('/api/annotations/create', {
         db_profile_id: db_profile_id
       })
-      .then(() => {})
-      .catch(() => {
-        toast.error('어노테이션 생성 중 오류가 발생했습니다.')
-      })
+    } catch (error) {
+      // 어노테이션 생성 실패는 일단 에러 토스트만 띄우고 플로우는 계속 진행시킵니다.
+      toast.error('어노테이션 생성 중 오류가 발생했습니다.')
+      console.error('Failed to create annotation:', error)
+    }
   }
 
   return (
