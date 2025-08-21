@@ -1,6 +1,7 @@
 import { Copy, Play, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Message } from '@ai-sdk/react'
+import { toast } from 'sonner'
 
 interface ChatMessageProps {
   message: Message
@@ -91,6 +92,24 @@ export default function ChatMessage({
 
   const sql = sqlMatch ? sqlMatch[1].trim() : null
 
+  const handleCopy = (): void => {
+    if (!sql) return
+    navigator.clipboard
+      .writeText(sql)
+      .then(() => {
+        toast.success('SQL이 클립보드에 복사되었습니다.')
+      })
+      .catch((err) => {
+        toast.error('복사에 실패했습니다.')
+        console.error('Failed to copy SQL: ', err)
+      })
+  }
+
+  const handleSave = (): void => {
+    if (!sql) return
+    window.api.send('save-sql', sql)
+  }
+
   if (isSystem) {
     return (
       <div className="self-stretch flex flex-col justify-start items-start gap-3">
@@ -134,13 +153,19 @@ export default function ChatMessage({
                 실행
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
+            <div
+              onClick={handleCopy}
+              className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2 cursor-pointer"
+            >
               <Copy className="size-4 stroke-[#E4E4E4]" />
               <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 복사
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
+            <div
+              onClick={handleSave}
+              className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2 cursor-pointer"
+            >
               <Save className="size-4 stroke-[#E4E4E4]" />
               <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 저장
