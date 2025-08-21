@@ -47,14 +47,6 @@ jobs:
       - name: Install dependencies
         run: npm cache clean --force && npm install
 
-      - name: Resign native binaries with ad-hoc signature
-        if: matrix.os == 'macos-latest'
-        run: |
-          codesign --remove-signature resources/mac/qgenie-api || true
-          codesign --remove-signature resources/mac/qgenie-ai || true
-          codesign --sign - resources/mac/qgenie-api
-          codesign --sign - resources/mac/qgenie-ai
-
       - name: Build the app
         run: npm run build -- --${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
 
