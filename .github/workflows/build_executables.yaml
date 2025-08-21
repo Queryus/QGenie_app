@@ -47,6 +47,12 @@ jobs:
       - name: Install dependencies
         run: npm cache clean --force && npm install
 
+      - name: Remove signature from native binaries
+        if: matrix.os == 'macos-latest'
+        run: |
+          codesign --remove-signature resources/mac/qgenie-api || true
+          codesign --remove-signature resources/mac/qgenie-ai || true
+
       - name: Build the app
         run: npm run build -- --${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
 
