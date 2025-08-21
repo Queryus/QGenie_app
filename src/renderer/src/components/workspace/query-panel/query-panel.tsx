@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import QueryEditor from './query-editor'
 import QueryResults, { type QueryResultData } from './query-results'
 import { ConnectionProfile } from '../../../types/database'
-import ConnectionSelector from './ConnectionSelector'
+import ConnectionSelector from './connection-selector'
 import { api } from '@renderer/utils/api'
 import { toast } from 'sonner'
 
@@ -129,11 +129,6 @@ export default function QueryPanel({
           <TabButton tabName="results" Icon={ChartColumn} label="실행 결과" />
         </div>
         <div className="flex items-center gap-2">
-          <ConnectionSelector
-            connections={connections}
-            activeConnection={activeConnection}
-            setActiveConnection={setActiveConnection}
-          />
           {activeTab == 'editor' ? (
             <button
               onClick={handleExecuteQuery}
@@ -159,7 +154,18 @@ export default function QueryPanel({
       </div>
       {/* Content */}
       <div className="overflow-hidden">
-        {activeTab === 'editor' && <QueryEditor query={query} setQuery={setQuery} />}
+        {activeTab === 'editor' && (
+          <div className="h-full flex flex-col">
+            <div className="p-2 border-b border-neutral-700">
+              <ConnectionSelector
+                connections={connections}
+                activeConnection={activeConnection}
+                setActiveConnection={setActiveConnection}
+              />
+            </div>
+            <QueryEditor query={query} setQuery={setQuery} />
+          </div>
+        )}
         {activeTab === 'results' && (
           <QueryResults result={result} isLoading={isLoading} error={error} />
         )}
