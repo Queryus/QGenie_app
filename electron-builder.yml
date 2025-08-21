@@ -1,6 +1,5 @@
 appId: com.Queryus.QGenie
 productName: QGenie
-afterPack: ./scripts/afterPack.js
 extraResources:
   - from: 'resources/'
     to: 'resources'
