@@ -23,8 +23,8 @@ app.whenReady().then(async () => {
 
   console.log('NODE_ENV in main process:', process.env.NODE_ENV)
 
-  getMainWindow()?.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
+    getMainWindow()?.webContents.openDevTools()
     setTimeout(() => {
       getMainWindow()?.webContents.send('backend-ready', { apiPort: 39722 })
     }, 1000)
@@ -119,9 +119,6 @@ async function startBackendServices(): Promise<void> {
   } else if (platform === 'darwin') {
     apiPath = path.join(basePath, 'mac', 'qgenie-api')
     aiPath = path.join(basePath, 'mac', 'qgenie-ai')
-  } else if (platform === 'linux') {
-    apiPath = path.join(basePath, 'linux', 'qgenie-api')
-    aiPath = path.join(basePath, 'linux', 'qgenie-ai')
   } else {
     throw new Error(`Unsupported platform: ${platform}`)
   }
@@ -129,7 +126,7 @@ async function startBackendServices(): Promise<void> {
   if (!fs.existsSync(apiPath)) throw new Error(`API executable not found: ${apiPath}`)
   if (!fs.existsSync(aiPath)) throw new Error(`AI executable not found: ${aiPath}`)
 
-  if (platform === 'darwin' || platform === 'linux') {
+  if (platform === 'darwin') {
     fs.chmodSync(apiPath, 0o755)
     fs.chmodSync(aiPath, 0o755)
   }
