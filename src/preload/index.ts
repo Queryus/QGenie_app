@@ -6,7 +6,7 @@ import type { CustomAPI } from './index.d'
 const api: CustomAPI = {
   versions: process.versions,
   send: <T = unknown>(channel: string, data?: T) => {
-    const validChannels = ['open-sub-window', 'ping', 'open-external']
+    const validChannels = ['open-sub-window', 'ping', 'open-external', 'save-sql', 'save-csv']
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data)
     }
