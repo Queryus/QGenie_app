@@ -3,14 +3,13 @@ import {
   Table2,
   KeyRound,
   Link,
-  Square,
-  SquareDashedBottomIcon as SquareDashed,
   Database,
   Calendar,
   Hash,
   Type,
   Check,
-  LucideProps
+  LucideProps,
+  Diamond
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,20 +28,20 @@ interface TableDetailSidebarProps {
 const constraintIcons = {
   primary: KeyRound,
   foreign: Link,
-  'not-null': Square,
-  nullable: SquareDashed,
+  'not-null': Diamond,
+  nullable: Diamond,
   unique: Hash,
   index: Database
 } as const
 
 // 제약 조건들 색상
 const constraintColors = {
-  primary: 'text-yellow-400 bg-yellow-400/10',
+  primary: 'text-purple-400 bg-purple-400/10',
   foreign: 'text-blue-400 bg-blue-400/10',
   'not-null': 'text-gray-400 bg-gray-400/10',
   nullable: 'text-gray-500 bg-gray-500/10',
   unique: 'text-green-400 bg-green-400/10',
-  index: 'text-purple-400 bg-purple-400/10'
+  index: 'text-yellow-400 bg-yellow-400/10'
 } as const
 
 // 제약 조건 표시
@@ -194,7 +193,10 @@ export function TableDetailSidebar({
                                       className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${colorClass}`}
                                       title={label}
                                     >
-                                      <IconComponent className="w-3 h-3" />
+                                      <IconComponent
+                                        className="w-3 h-3"
+                                        fill={constraint === 'not-null' ? 'gray' : 'black'}
+                                      />
                                       <span>{label}</span>
                                     </div>
                                   )
