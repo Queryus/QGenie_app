@@ -58,6 +58,8 @@ export function registerIpcHandlers(mainWindow?: BrowserWindow): void {
         requestBody
       )
 
+      console.log('Backend response data:', JSON.stringify(response.data, null, 2))
+
       if (response.data && response.data.data) {
         const aiMessage = response.data.data.message as string
 
