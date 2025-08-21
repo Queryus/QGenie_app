@@ -10,6 +10,10 @@ import { ChatTab } from './ai-chat.types'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 
+interface AiChatPanelProps {
+  onExecuteQuery: (sql: string, chatMessageId: string) => void
+}
+
 const initialSuggestions = [
   '가장 많이 팔린 상품 5개 보여줘',
   '지난달 매출 총액은 얼마야?',
@@ -22,7 +26,7 @@ const systemMessage: Message = {
   content: '안녕하세요!\n자연어로 데이터베이스에 질문하시면 SQL 쿼리를 자동으로 생성해드립니다.'
 }
 
-export default function AiChatPanel(): React.JSX.Element {
+export default function AiChatPanel({ onExecuteQuery }: AiChatPanelProps): React.JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const [activeTabName, setActiveTabName] = useState<string>('AI 채팅')
@@ -210,7 +214,7 @@ export default function AiChatPanel(): React.JSX.Element {
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-6">
         {messages.map((m, index) => (
           <div key={m.id}>
-            <ChatMessage message={m} highlightTerm={searchTerm} />
+            <ChatMessage message={m} highlightTerm={searchTerm} onExecuteQuery={onExecuteQuery} />
             {m.role === 'system' && index === 0 && (
               <div className="self-stretch inline-flex justify-start items-center gap-3 flex-wrap mt-3">
                 {initialSuggestions.map((suggestion, i) => (

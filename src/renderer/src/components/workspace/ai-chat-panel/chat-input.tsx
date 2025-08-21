@@ -50,7 +50,7 @@ const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(function ChatI
           <div className="flex justify-start items-center gap-[5px]">
             <BotMessageSquare className="size-3 stroke-[#E4E4E4]" />
             <div className="justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
-              ChatGPT 4o
+              gpt-4o-mini
             </div>
             <ChevronRight className="size-3 stroke-[#E4E4E4]" />
           </div>
