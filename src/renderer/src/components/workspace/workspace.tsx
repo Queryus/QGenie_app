@@ -5,7 +5,6 @@ import { QueryPanel, type QueryResultData, type ActiveTab } from './query-panel'
 import { api } from '@renderer/utils/api'
 import { toast } from 'sonner'
 import { ConnectionProfile } from '@renderer/types/database'
-import { ApiResponse } from '@renderer/types'
 
 // API 응답 타입을 Workspace 레벨에서 정의합니다.
 interface QueryApiResponse {
@@ -15,13 +14,13 @@ interface QueryApiResponse {
   }
 }
 
-const WorkSpace = (): React.JSX.Element => {
-  // --- 기존 상태 ---
-  const [connections, setConnections] = useState<ConnectionProfile[]>([])
-  const [activeConnection, setActiveConnection] = useState<ConnectionProfile | null>(null)
-  const [isConnectionLoading, setIsConnectionLoading] = useState(true)
+interface WorkSpaceProps {
+  connections: ConnectionProfile[]
+}
 
-  // --- QueryPanel로부터 이동된 상태 ---
+const WorkSpace = ({ connections }: WorkSpaceProps): React.JSX.Element => {
+  // --- 상태 관리 ---
+  const [activeConnection, setActiveConnection] = useState<ConnectionProfile | null>(null)
   const [query, setQuery] = useState(
     'SELECT p.ProductName, SUM(sod.sales_quantity) as total_quantity_sold, SUM(sod.sales_quantity * sod.UnitPrice) as total_revenue FROM Products p JOIN SalesOrderDetails sod ON p.ProductID = sod.ProductID GROUP BY p.ProductID, p.ProductName ORDER BY total_revenue DESC LIMIT 5;'
   )
@@ -30,30 +29,18 @@ const WorkSpace = (): React.JSX.Element => {
   const [queryError, setQueryError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<ActiveTab>('editor')
 
+  // MainPage로부터 받은 connections prop이 변경될 때 activeConnection을 설정합니다.
   useEffect(() => {
-    const fetchConnections = async (): Promise<void> => {
-      try {
-        const res = await api.get<ApiResponse<ConnectionProfile[]>>('/api/user/db/find/all')
-        if (res && Array.isArray(res.data)) {
-          const fetchedConnections = res.data
-          setConnections(fetchedConnections)
-          if (fetchedConnections.length > 0) {
-            setActiveConnection(fetchedConnections[0])
-          }
-        } else {
-          throw new Error('Invalid API response format')
-        }
-      } catch (error) {
-        toast.error('DB 연결 목록을 불러오는 데 실패했습니다.')
-        console.error('[Workspace] DB 연결 목록 조회 실패:', error)
-      } finally {
-        setIsConnectionLoading(false)
-      }
-    }
-    fetchConnections()
-  }, [])
+    const isActiveConnectionValid = connections.some((c) => c.id === activeConnection?.id)
 
-  // --- QueryPanel로부터 이동된 쿼리 실행 함수 ---
+    if (!isActiveConnectionValid && connections.length > 0) {
+      setActiveConnection(connections[0])
+    } else if (connections.length === 0) {
+      setActiveConnection(null)
+    }
+  }, [connections, activeConnection])
+
+  // --- 핸들러 ---
   const handleExecuteQuery = async (
     queryToExecute: string,
     chatMessageId?: string
@@ -92,36 +79,31 @@ const WorkSpace = (): React.JSX.Element => {
     }
   }
 
-  // --- AI 채팅 패널에서 호출할 함수 ---
   const handleAiQueryExecute = (sql: string, chatMessageId: string): void => {
-    setQuery(sql) // 쿼리 편집기 내용 업데이트
-    handleExecuteQuery(sql, chatMessageId) // 쿼리 실행
+    setQuery(sql)
+    handleExecuteQuery(sql, chatMessageId)
   }
 
   return (
     <main className="flex flex-1 h-full bg-zinc-900 pt-2 pr-2 pb-2">
-      <DbSchemaPanel profiles={connections} isLoading={isConnectionLoading} />
+      <DbSchemaPanel profiles={connections} isLoading={false} />
       <div className="grid grid-cols-2 flex-1 h-full ml-2 gap-2">
         <div className="min-w-0 flex">
           <AiChatPanel onExecuteQuery={handleAiQueryExecute} />
         </div>
         <div className="min-w-0 flex">
           <QueryPanel
-            // Connection state
             connections={connections}
             activeConnection={activeConnection}
             setActiveConnection={setActiveConnection}
-            // Query state
             query={query}
             setQuery={setQuery}
             result={result}
             isLoading={isQueryLoading}
             error={queryError}
             setError={setQueryError}
-            // Tab state
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            // Execution handler
             onExecuteQuery={() => handleExecuteQuery(query)}
           />
         </div>
