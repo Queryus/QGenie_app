@@ -108,7 +108,7 @@ export default function ChatMessage({
         isUser ? 'items-end' : 'items-start'
       )}
     >
-      {(isAi || isUser) && (
+      {(isAi || isUser) && mainContent && (
         <div
           className={cn(
             "w-fit max-w-md px-3 py-1.5 rounded-lg text-xs font-medium font-['Pretendard'] leading-none text-neutral-200",
