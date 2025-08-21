@@ -5,6 +5,10 @@ import { cn } from '@/lib/utils'
 import type { NavItem } from '../workspace/types'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+interface SidebarProps {
+  hasConnections: boolean
+}
+
 const bottomNavItems: NavItem[] = [
   {
     id: 'settings',
@@ -40,7 +44,7 @@ function NavButton({ item }: { item: NavItem }): React.JSX.Element {
         'size-10 rounded-lg',
         item.active && 'bg-neutral-700 outline-1 outline-offset-[-1px] outline-white/20',
         !item.active && 'hover:bg-neutral-700/50',
-        item.disabled && 'cursor-not-allowed'
+        item.disabled && 'cursor-not-allowed opacity-50'
       )}
       onClick={item.onClick}
       disabled={item.disabled}
@@ -57,7 +61,7 @@ function NavButton({ item }: { item: NavItem }): React.JSX.Element {
   )
 }
 
-export function Sidebar(): React.JSX.Element {
+export function Sidebar({ hasConnections }: SidebarProps): React.JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -72,9 +76,9 @@ export function Sidebar(): React.JSX.Element {
       id: 'tags',
       icon: Tag,
       active: location.pathname === '/erd',
-      disabled: false,
+      disabled: !hasConnections,
       onClick: (): void | Promise<void> => navigate('/erd')
-    } // TODO: DB 연결 후에 disabled: false
+    }
   ]
 
   return (
