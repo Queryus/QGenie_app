@@ -3,18 +3,13 @@ import { toast } from 'sonner'
 import { api } from '@renderer/utils/api'
 import { SchemaNode, SchemaNodeType } from './db-schema.types'
 import SchemaTreeItem from './schema-tree-item'
+import { ConnectionProfile } from '../../../types/database'
 
 // API 응답 타입을 위한 인터페이스 정의
 interface ApiResponse<T> {
   code: string
   message: string
   data: T
-}
-
-interface DbProfile {
-  id: string
-  view_name?: string
-  name?: string
 }
 
 interface ColumnInfo {
@@ -47,28 +42,34 @@ const initializeExpandedState = (nodes: SchemaNode[]): Record<string, boolean> =
   return state
 }
 
+interface DbSchemaPanelProps {
+  profiles: ConnectionProfile[]
+  isLoading: boolean
+}
+
 /**
  * @author nahyeongjin1
  * @summary DB 스키마 정보를 보여주는 패널
  * @returns JSX.Element
  */
-export default function DbSchemaPanel(): React.JSX.Element {
+export default function DbSchemaPanel({
+  profiles,
+  isLoading: isLoadingProfiles
+}: DbSchemaPanelProps): React.JSX.Element {
   const [schemaData, setSchemaData] = useState<SchemaNode[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isSchemaLoading, setIsSchemaLoading] = useState(true)
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
+    // profiles가 비어있거나 로딩 중이면 아무것도 하지 않음
+    if (isLoadingProfiles || profiles.length === 0) {
+      if (!isLoadingProfiles) setIsSchemaLoading(false)
+      return
+    }
+
     const fetchSchemaData = async (): Promise<void> => {
       try {
-        const profilesRes = (await api.get('/api/user/db/find/all')) as unknown as ApiResponse<
-          DbProfile[]
-        >
-        const profiles = profilesRes.data
-
-        if (!profiles || !Array.isArray(profiles)) {
-          throw new Error('Invalid profile data received')
-        }
-
+        console.log('[DbSchemaPanel] 받은 profiles로 스키마 정보 조회를 시작합니다:', profiles)
         const allSchemasPromises = profiles.map((profile) =>
           api.get(`/api/user/db/find/hierarchical-schema/${profile.id}`)
         )
@@ -87,7 +88,7 @@ export default function DbSchemaPanel(): React.JSX.Element {
               response.data.length === 0
             ) {
               console.warn(
-                `Could not fetch schema for ${profile.view_name}: ${response.message || 'Empty data'}`
+                `[DbSchemaPanel] 스키마 조회 실패 ${profile.view_name}: ${response.message || 'Empty data'}`
               )
               return null
             }
@@ -115,19 +116,19 @@ export default function DbSchemaPanel(): React.JSX.Element {
             }
           })
           .filter(Boolean) as SchemaNode[]
-
+        console.log('[DbSchemaPanel] 스키마 정보 변환 완료:', transformedData)
         setSchemaData(transformedData)
         setExpandedNodes(initializeExpandedState(transformedData))
       } catch (error) {
         toast.error('데이터베이스 스키마 정보를 불러오는 데 실패했습니다.')
-        console.error(error)
+        console.error('[DbSchemaPanel] 스키마 정보 조회 실패:', error)
       } finally {
-        setIsLoading(false)
+        setIsSchemaLoading(false)
       }
     }
 
     fetchSchemaData()
-  }, [])
+  }, [profiles, isLoadingProfiles])
 
   const handleToggle = (nodeId: string): void => {
     setExpandedNodes((prev) => ({
@@ -136,7 +137,7 @@ export default function DbSchemaPanel(): React.JSX.Element {
     }))
   }
 
-  if (isLoading) {
+  if (isLoadingProfiles || isSchemaLoading) {
     return (
       <div className="w-56 h-full p-3 bg-neutral-800 flex items-center justify-center">
         <p className="text-neutral-400 text-sm">로딩 중...</p>
