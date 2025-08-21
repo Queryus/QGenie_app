@@ -97,6 +97,41 @@ export default function QueryPanel({
     setActiveTab(tabName)
   }
 
+  const handleExport = (): void => {
+    if (activeTab === 'editor') {
+      if (!query.trim()) {
+        toast.info('내보낼 쿼리가 없습니다.')
+        return
+      }
+      window.api.send('save-sql', query)
+    } else if (activeTab === 'results') {
+      if (!result || result.rows.length === 0) {
+        toast.info('내보낼 결과가 없습니다.')
+        return
+      }
+
+      const { columns, rows } = result
+      const header = columns.join(',')
+      const body = rows
+        .map((row) =>
+          row
+            .map((cell) => {
+              const cellStr = String(cell ?? '')
+              // 셀에 쉼표나 큰따옴표가 포함된 경우 큰따옴표로 감싸고, 내부 큰따옴표는 두 번 씁니다.
+              if (cellStr.includes(',') || cellStr.includes('"')) {
+                return `"${cellStr.replace(/"/g, '""')}"`
+              }
+              return cellStr
+            })
+            .join(',')
+        )
+        .join('\n')
+
+      const csvContent = `${header}\n${body}`
+      window.api.send('save-csv', csvContent)
+    }
+  }
+
   const TabButton = ({
     tabName,
     Icon,
@@ -146,7 +181,10 @@ export default function QueryPanel({
           ) : (
             <></>
           )}
-          <div className="px-3 py-1.5 bg-gradient-genie-primary rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2 cursor-pointer">
+          <div
+            onClick={handleExport}
+            className="px-3 py-1.5 bg-gradient-genie-primary rounded-lg outline-1 outline-offset-[-1px] outline-white/20 flex justify-center items-center gap-2 cursor-pointer"
+          >
             <Download className="size-3 stroke-genie-100" />
             <div className="justify-start text-genie-100 text-button font-pretendard">내보내기</div>
           </div>

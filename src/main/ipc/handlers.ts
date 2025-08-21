@@ -1,4 +1,5 @@
-import { BrowserWindow, ipcMain, shell } from 'electron'
+import { BrowserWindow, ipcMain, shell, dialog } from 'electron'
+import fs from 'fs'
 import { createSubWindow } from '../windows/subWindow'
 import axios from 'axios'
 
@@ -32,6 +33,50 @@ export function registerIpcHandlers(mainWindow?: BrowserWindow): void {
   ipcMain.on('close-current-window', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     win?.close()
+  })
+
+  // 파일 저장 핸들러: SQL
+  ipcMain.on('save-sql', async (_event, sqlContent: string) => {
+    const window = BrowserWindow.getFocusedWindow()
+    if (!window) return
+
+    const { filePath } = await dialog.showSaveDialog(window, {
+      title: 'Save SQL File',
+      defaultPath: `query-${Date.now()}.sql`,
+      filters: [{ name: 'SQL Files', extensions: ['sql'] }]
+    })
+
+    if (filePath) {
+      try {
+        fs.writeFileSync(filePath, sqlContent, 'utf-8')
+        console.log('SQL file saved to:', filePath)
+      } catch (err) {
+        console.error('Failed to save SQL file:', err)
+      }
+    }
+  })
+
+  // 파일 저장 핸들러: CSV
+  ipcMain.on('save-csv', async (_event, csvContent: string) => {
+    const window = BrowserWindow.getFocusedWindow()
+    if (!window) return
+
+    const { filePath } = await dialog.showSaveDialog(window, {
+      title: 'Save CSV File',
+      defaultPath: `results-${Date.now()}.csv`,
+      filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+    })
+
+    if (filePath) {
+      try {
+        // CSV 파일에 BOM을 추가하여 Excel에서 한글이 깨지지 않도록 함
+        const BOM = '\uFEFF'
+        fs.writeFileSync(filePath, BOM + csvContent, 'utf-8')
+        console.log('CSV file saved to:', filePath)
+      } catch (err) {
+        console.error('Failed to save CSV file:', err)
+      }
+    }
   })
 
   // Vercel AI SDK 'useChat' 훅을 위한 핸들러 (스트리밍 시뮬레이션)
