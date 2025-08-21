@@ -1,6 +1,7 @@
-// scripts/afterPack.js
-import { execSync } from 'child_process'
-import path from 'path'
+/* eslint-disable @typescript-eslint/no-require-imports */
+
+const { execSync } = require('child_process')
+const path = require('path')
 
 exports.default = async function (context) {
   const { appOutDir, packager } = context
