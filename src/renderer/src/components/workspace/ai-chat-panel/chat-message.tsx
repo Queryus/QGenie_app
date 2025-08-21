@@ -1,10 +1,12 @@
 import { Copy, Play, Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Message } from '@ai-sdk/react'
+import { toast } from 'sonner'
 
 interface ChatMessageProps {
   message: Message
   highlightTerm?: string
+  onExecuteQuery: (sql: string, chatMessageId: string) => void
 }
 
 /**
@@ -77,9 +79,10 @@ const HighlightedText = ({
  */
 export default function ChatMessage({
   message,
-  highlightTerm = ''
+  highlightTerm = '',
+  onExecuteQuery
 }: ChatMessageProps): React.JSX.Element {
-  const { role, content } = message
+  const { id, role, content } = message
 
   const isUser = role === 'user'
   const isSystem = role === 'system'
@@ -90,6 +93,29 @@ export default function ChatMessage({
   const mainContent = sqlMatch ? content.replace(sqlMatch[0], '').trim() : content
 
   const sql = sqlMatch ? sqlMatch[1].trim() : null
+
+  const handleCopy = (): void => {
+    if (!sql) return
+    navigator.clipboard
+      .writeText(sql)
+      .then(() => {
+        toast.success('SQL이 클립보드에 복사되었습니다.')
+      })
+      .catch((err) => {
+        toast.error('복사에 실패했습니다.')
+        console.error('Failed to copy SQL: ', err)
+      })
+  }
+
+  const handleSave = (): void => {
+    if (!sql) return
+    window.api.send('save-sql', sql)
+  }
+
+  const handleExecute = (): void => {
+    if (!sql) return
+    onExecuteQuery(sql, id)
+  }
 
   if (isSystem) {
     return (
@@ -128,19 +154,28 @@ export default function ChatMessage({
             <HighlightedText text={sql} highlight={highlightTerm} />
           </div>
           <div className="inline-flex justify-start items-start gap-2.5">
-            <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
+            <div
+              onClick={handleExecute}
+              className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2 cursor-pointer"
+            >
               <Play className="size-4 stroke-[#E4E4E4]" />
               <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 실행
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
+            <div
+              onClick={handleCopy}
+              className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2 cursor-pointer"
+            >
               <Copy className="size-4 stroke-[#E4E4E4]" />
               <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 복사
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2">
+            <div
+              onClick={handleSave}
+              className="px-3 py-1.5 bg-neutral-800 rounded-md outline-1 outline-offset-[-1px] outline-neutral-700 flex justify-center items-center gap-2 cursor-pointer"
+            >
               <Save className="size-4 stroke-[#E4E4E4]" />
               <div className="py-0.75 justify-start text-neutral-200 text-xs font-semibold font-['Pretendard'] leading-none">
                 저장
