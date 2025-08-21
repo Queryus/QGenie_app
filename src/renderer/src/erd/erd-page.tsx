@@ -313,7 +313,7 @@ export default function ErdPage(): React.JSX.Element {
   return (
     <ReactFlowProvider>
       <div className="w-screen h-screen bg-zinc-900 flex overflow-hidden relative">
-        <Sidebar />
+        <Sidebar hasConnections={dbList.length !== 0} />
         <AnnotationSidebar dbList={dbList} selectedDB={selectedDB} setSelectedDB={setSelectedDB} />
         <div className="flex-1 relative">
           <ErdContent nodes={nodes} setNodes={setNodes} onNodesChange={onNodesChange} />
