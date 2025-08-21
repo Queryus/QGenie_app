@@ -11,5 +11,5 @@ export interface NavItem {
 export interface FeatureCardData {
   title: string
   description: React.ReactNode
-  image?: string
+  image: string
 }

@@ -1,6 +1,9 @@
 import { Plus } from 'lucide-react'
 import { FeatureCard } from './feature-card'
 import type { FeatureCardData } from './types'
+import naturalQueryImage from '../../assets/empty-image/natural-language-query.png'
+import queryResultImage from '../../assets/empty-image/query-result.png'
+import autoColumnImage from '../../assets/empty-image/auto-column-description.png'
 
 const featureCards: FeatureCardData[] = [
   {
@@ -11,7 +14,8 @@ const featureCards: FeatureCardData[] = [
         <br />
         자연어로 입력하면 쿼리를 만들어줘요.
       </>
-    )
+    ),
+    image: naturalQueryImage
   },
   {
     title: '쿼리 실행 결과 확인',
@@ -21,7 +25,8 @@ const featureCards: FeatureCardData[] = [
         <br />
         결과는 표로 정리돼 한눈에 보여요.
       </>
-    )
+    ),
+    image: queryResultImage
   },
   {
     title: '자동 컬럼 설명 생성',
@@ -31,7 +36,8 @@ const featureCards: FeatureCardData[] = [
         <br />
         이해하기 쉬운 설명을 자동으로 생성해줘요.
       </>
-    )
+    ),
+    image: autoColumnImage
   }
 ]
 
